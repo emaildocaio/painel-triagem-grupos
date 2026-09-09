@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Triagem de grupos · Renato Pellizzari</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Barlow+Semi+Condensed:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--papel:#F4ECDC;--papel-fundo:#EDE2CD;--cafe:#2B1D16;--cafe-suave:#6B564A;
+--terracota:#A8402A;--laranja:#DE6E24;--selo:#E9B231;
+--linha:rgba(43,29,22,.18);--linha-forte:rgba(43,29,22,.42);}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--papel-fundo);color:var(--cafe);
+font-family:"Barlow Semi Condensed","Helvetica Neue",Arial,sans-serif;font-size:17px;line-height:1.45;
+-webkit-font-smoothing:antialiased;}
+.folha{max-width:1120px;margin:0 auto;background:var(--papel);padding:0 clamp(16px,4vw,48px) 64px;
+border-left:1px solid var(--linha);border-right:1px solid var(--linha);min-height:100vh;}
+h1,h2,h3{font-family:"Fredoka",sans-serif;font-weight:600;margin:0;}
+.marca{display:flex;align-items:baseline;gap:12px;font-family:"Fredoka",sans-serif;font-weight:600;font-size:19px;}
+.numero-urna{background:var(--selo);padding:1px 9px;border-radius:3px;}
+input,select,button{font-family:inherit;font-size:16px;color:var(--cafe);}
+input,select{background:var(--papel-fundo);border:1.5px solid var(--linha-forte);padding:8px 11px;border-radius:2px;}
+button{font-family:"Fredoka",sans-serif;font-weight:500;font-size:15px;cursor:pointer;
+background:var(--papel-fundo);border:1.5px solid var(--cafe);padding:8px 14px;border-radius:2px;}
+button:hover{background:var(--selo);}
+button.primario{background:var(--terracota);color:var(--papel);border-color:var(--terracota);}
+button.primario:hover{background:var(--cafe);border-color:var(--cafe);}
+
+/* ---------- porta ---------- */
+#porta{max-width:430px;margin:0 auto;padding:12vh 0 0;}
+#porta h1{font-size:34px;color:var(--terracota);margin:22px 0 8px;}
+#porta p{color:var(--cafe-suave);margin:0 0 22px;}
+#porta label{display:block;font-family:"Fredoka",sans-serif;font-size:15.5px;margin:14px 0 5px;}
+#porta input{width:100%;}
+#porta button{width:100%;margin-top:18px;padding:11px;}
+.erro{color:var(--terracota);font-weight:600;margin-top:12px;display:none;}
+
+/* ---------- painel ---------- */
+#painel{display:none;}
+.cabecalho{padding:32px 0 18px;border-bottom:3px solid var(--cafe);}
+.cabecalho h1{font-size:clamp(26px,4vw,36px);color:var(--terracota);margin:16px 0 8px;}
+.subtitulo{color:var(--cafe-suave);max-width:70ch;margin:0;}
+.barra-topo{position:sticky;top:0;z-index:20;background:var(--papel);
+border-bottom:2px solid var(--cafe);padding:12px 0;margin-top:22px;}
+.filtros{display:flex;flex-wrap:wrap;gap:9px;align-items:center;}
+input[type=search]{flex:1 1 190px;min-width:160px;}
+.barra-prog{height:15px;background:rgba(43,29,22,.1);margin-top:12px;display:flex;overflow:hidden;}
+.barra-prog i{display:block;height:100%;transition:width .2s;}
+.bp-usar{background:var(--laranja);}.bp-ign{background:var(--cafe-suave);}
+.placar{display:flex;flex-wrap:wrap;gap:18px;margin-top:9px;font-size:15.5px;}
+.placar b{font-family:"Fredoka",sans-serif;font-size:21px;font-variant-numeric:tabular-nums;}
+.placar span{display:flex;align-items:baseline;gap:6px;color:var(--cafe-suave);}
+.c-usar b{color:var(--laranja);}.c-pend b{color:var(--terracota);}.c-alc b{color:var(--terracota);}
+.sync{font-family:"Fredoka",sans-serif;font-size:14.5px;padding:2px 10px;border-radius:11px;}
+.sync.ok{background:rgba(43,29,22,.12);color:var(--cafe-suave);}
+.sync.indo{background:var(--selo);color:var(--cafe);}
+.sync.ruim{background:var(--terracota);color:var(--papel);}
+
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;margin-top:6px;}
+thead th{position:sticky;top:0;background:var(--papel);text-align:left;font-weight:600;font-size:15px;
+color:var(--cafe-suave);padding:10px 8px;border-bottom:1px solid var(--linha-forte);z-index:5;}
+th.num,td.num{text-align:right;}
+tbody td{padding:8px;border-bottom:1px solid var(--linha);font-size:16.5px;vertical-align:middle;}
+tbody tr.usar{background:rgba(222,110,36,.13);}
+tbody tr.ignorar{opacity:.5;}
+.nome-grupo{word-break:break-word;}
+.aviso-linha{display:block;font-size:14px;color:var(--terracota);margin-top:2px;}
+.obs{width:100%;font-size:14.5px;background:transparent;border:none;
+border-bottom:1px dashed var(--linha-forte);padding:3px 0;margin-top:4px;}
+.obs:focus{outline:none;border-bottom-color:var(--terracota);background:rgba(233,178,49,.12);}
+td select{font-size:15px;padding:4px 6px;max-width:180px;}
+.dec{display:inline-flex;border:1.5px solid var(--linha-forte);border-radius:2px;overflow:hidden;}
+.dec button{border:none;border-radius:0;padding:5px 11px;font-size:14.5px;background:transparent;}
+.dec button+button{border-left:1.5px solid var(--linha-forte);}
+.dec button[aria-pressed=true].bu{background:var(--laranja);color:var(--papel);}
+.dec button[aria-pressed=true].bi{background:var(--cafe);color:var(--papel);}
+.tag{display:inline-block;font-size:13.5px;padding:2px 8px;border:1px solid var(--linha-forte);
+border-radius:11px;color:var(--cafe-suave);white-space:nowrap;}
+.tag.setembro_2026{border-color:var(--terracota);color:var(--terracota);}
+.vazio{padding:34px 0;color:var(--cafe-suave);}
+footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--linha-forte);
+font-size:15px;color:var(--cafe-suave);max-width:78ch;}
+@media(max-width:760px){td.mem,th.mem,td.orig,th.orig{display:none;}td select{max-width:120px;font-size:14px;}}
+</style>
+</head>
+<body>
+<div class="folha">
+
+  <!-- ============ PORTA ============ -->
+  <section id="porta">
+    <div class="marca">Renato Pellizzari <span class="numero-urna">40004</span></div>
+    <h1>Triagem de grupos</h1>
+    <p>Acesso restrito. Peça a senha ao Caio.</p>
+    <label for="pNome">Seu nome</label>
+    <input type="text" id="pNome" autocomplete="name" placeholder="quem está decidindo">
+    <label for="pSenha">Senha de acesso</label>
+    <input type="password" id="pSenha" autocomplete="current-password">
+    <button class="primario" id="pEntrar">Entrar</button>
+    <p class="erro" id="pErro"></p>
+  </section>
+
+  <!-- ============ PAINEL ============ -->
+  <section id="painel">
+    <header class="cabecalho">
+      <div class="marca">Renato Pellizzari <span class="numero-urna">40004</span></div>
+      <h1>Triagem dos grupos de WhatsApp</h1>
+      <p class="subtitulo">Decida quais grupos entram nos disparos. Cada clique é gravado no banco na hora — não existe salvar nem enviar arquivo. A lista abre pelos mais recentes: os de setembro vieram do aparelho do Renato, os de julho foram enviados pelo Pachá.</p>
+    </header>
+
+    <div class="barra-topo">
+      <div class="filtros">
+        <input type="search" id="busca" placeholder="Buscar grupo…" autocomplete="off">
+        <select id="fcat"><option value="">Todas as categorias</option></select>
+        <select id="fdec">
+          <option value="">Todas as decisões</option>
+          <option value="pendente">Só pendentes</option>
+          <option value="usar">Só marcados usar</option>
+          <option value="ignorar">Só marcados ignorar</option>
+        </select>
+        <select id="fbase">
+          <option value="">Todas as origens</option>
+          <option value="setembro_2026">set/2026 — aparelho do Renato</option>
+          <option value="julho_2026">jul/2026 — lista do Pachá</option>
+        </select>
+        <select id="fnota"><option value="">Com e sem aviso</option><option value="sim">Só os com aviso</option></select>
+        <select id="ordem">
+          <option value="recente">Mais recentes primeiro</option>
+          <option value="tamanho">Maiores primeiro</option>
+          <option value="nome">Nome A–Z</option>
+        </select>
+        <button id="aplicarSug">Aplicar sugestão</button>
+        <button id="loteUsar">Usar visíveis</button>
+        <button id="loteIgn">Ignorar visíveis</button>
+        <button id="recarregar">Recarregar</button>
+      </div>
+      <div class="barra-prog"><i class="bp-usar" id="bpUsar" style="width:0"></i><i class="bp-ign" id="bpIgn" style="width:0"></i></div>
+      <div class="placar">
+        <span class="c-usar"><b id="pUsar">0</b> usar</span>
+        <span><b id="pIgn">0</b> ignorar</span>
+        <span class="c-pend"><b id="pPend">0</b> pendentes</span>
+        <span class="c-alc"><b id="pAlc">0</b> inscrições alcançadas</span>
+        <span><b id="pVis">0</b> na tela</span>
+        <span class="sync ok" id="sync">tudo gravado</span>
+      </div>
+    </div>
+
+    <table>
+      <thead><tr>
+        <th style="width:132px">Decisão</th>
+        <th>Grupo</th>
+        <th style="width:180px">Categoria</th>
+        <th class="num mem" style="width:92px">Membros</th>
+        <th class="orig" style="width:120px">Entrada</th>
+      </tr></thead>
+      <tbody id="corpo"></tbody>
+    </table>
+    <div class="vazio" id="vazio" style="display:none">Nenhum grupo corresponde a esses filtros.</div>
+
+    <footer>
+      Cada decisão vai direto para a tabela <code>grupos_whatsapp</code> no banco da campanha,
+      com o nome de quem decidiu e a data. Pode fechar a página a qualquer momento e voltar
+      depois — nada se perde. Se aparecer "erro ao gravar" no indicador, a conexão caiu:
+      clique em Recarregar para conferir o que chegou.
+    </footer>
+  </section>
+</div>
+
+<script>
+(function(){
+  const FEED = "https://puihfdsshfpianxbjneg.supabase.co/functions/v1/triagem-grupos";
+  const ROTULOS={agenda_pessoal:'Agenda pessoal',bairro_vizinhanca:'Bairro e vizinhança',
+    campanha_pelli:'Campanha Pelli',carnaval_samba:'Carnaval e samba',
+    cinema_audiovisual:'Cinema e audiovisual',comunicacao_midia:'Comunicação e mídia',
+    comunidade_escolar:'Comunidade escolar',cultura_fomento:'Cultura e fomento',
+    educacao:'Educação',esporte:'Esporte',movimentos_sociais:'Movimentos sociais',
+    outros:'Outros',pessoal_familia:'Pessoal e família',politica_eleitoral:'Política e eleitoral',
+    trabalho_gestao:'Trabalho e gestão'};
+  const CATS=Object.keys(ROTULOS).sort((a,b)=>ROTULOS[a].localeCompare(ROTULOS[b],'pt-BR'));
+  const SUG={campanha_pelli:'usar',comunidade_escolar:'usar',educacao:'usar',
+    bairro_vizinhanca:'usar',cultura_fomento:'usar',
+    pessoal_familia:'ignorar',trabalho_gestao:'ignorar'};
+  const RX_OUTRA=/tarcisio motta|laura carneiro|taliria|psol|lindbergh|anielle|haddad|jabbour|bolsonarist|fora bozo|memes progressistas|militancia digital|mandatos progressistas|frente progressista|esquerda festiva|emergencia fascista|o brasil quer|zapdohaddad|mobiliza lula|arrancada final ep|agendas campanha ep/;
+  const RX_NAC=/brasil|nacional|sudeste/;
+
+  const $=id=>document.getElementById(id);
+  const norm=s=>(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  let SENHA='', AUTOR='', GRUPOS=[], visiveis=[], pendentesSync=0, falhou=0;
+
+  function enriquecer(g){
+    const n=norm(g.nome), notas=[];
+    let s=SUG[g.categoria]||'avaliar';
+    if(RX_OUTRA.test(n)){ s='avaliar'; notas.push('mobilização de outra candidatura'); }
+    if((g.qtd_membros||0)>=500) notas.push('grupo grande, risco maior de denúncia');
+    if(RX_NAC.test(n)&&(g.qtd_membros||0)>=200) notas.push('alcance nacional, pode ter pouco eleitor do RJ');
+    if(g.categoria==='outros') notas.push('tema não identificado');
+    g.sug=s; g.nota=notas.join('; ');
+    g.decisao_campanha=g.decisao_campanha||'pendente';
+    g.categoria=g.categoria||'outros';
+    g.qtd_membros=g.qtd_membros||0;
+    g.origem_lista=g.origem_lista||'julho_2026';
+    g.observacao_triagem=g.observacao_triagem||'';
+    return g;
+  }
+
+  async function feed(metodo, corpo){
+    const opt={method:metodo,headers:{'x-pelli-key':SENHA}};
+    if(corpo){ opt.headers['Content-Type']='application/json'; opt.body=JSON.stringify(corpo); }
+    const r=await fetch(FEED,opt);
+    if(r.status===401) throw new Error('senha');
+    if(!r.ok) throw new Error('http '+r.status);
+    return r.json();
+  }
+
+  // ---------- porta ----------
+  async function entrar(){
+    const nome=$('pNome').value.trim(), senha=$('pSenha').value;
+    if(!nome){ return falha('Escreva seu nome — ele fica registrado em cada decisão.'); }
+    if(!senha){ return falha('Digite a senha.'); }
+    $('pEntrar').disabled=true; $('pEntrar').textContent='Entrando…';
+    SENHA=senha; AUTOR=nome;
+    try{
+      const d=await feed('GET');
+      GRUPOS=(d.grupos||[]).map(enriquecer);
+      $('porta').style.display='none';
+      $('painel').style.display='block';
+      montarFiltros(); desenhar();
+    }catch(e){
+      SENHA='';
+      falha(e.message==='senha' ? 'Senha incorreta.' : 'Não consegui falar com o servidor. Tente de novo em instantes.');
+    }finally{ $('pEntrar').disabled=false; $('pEntrar').textContent='Entrar'; }
+  }
+  function falha(msg){ const el=$('pErro'); el.textContent=msg; el.style.display='block'; }
+  $('pEntrar').addEventListener('click',entrar);
+  $('pSenha').addEventListener('keydown',e=>{ if(e.key==='Enter') entrar(); });
+
+  // ---------- gravação ----------
+  function pintarSync(){
+    const el=$('sync');
+    if(falhou){ el.className='sync ruim'; el.textContent=falhou+' erro(s) ao gravar'; }
+    else if(pendentesSync){ el.className='sync indo'; el.textContent='gravando…'; }
+    else { el.className='sync ok'; el.textContent='tudo gravado'; }
+  }
+  async function gravar(g){
+    pendentesSync++; pintarSync();
+    try{
+      await feed('POST',{nome:g.nome,decisao:g.decisao_campanha,categoria:g.categoria,
+        observacao:g.observacao_triagem,autor:AUTOR});
+      if(falhou) falhou=Math.max(0,falhou-1);
+    }catch(e){ falhou++; }
+    finally{ pendentesSync--; pintarSync(); }
+  }
+  async function gravarLote(lista){
+    for(let i=0;i<lista.length;i+=4){
+      await Promise.all(lista.slice(i,i+4).map(gravar));
+    }
+  }
+
+  // ---------- render ----------
+  function montarFiltros(){
+    CATS.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=ROTULOS[c];$('fcat').appendChild(o);});
+    ['busca','fcat','fdec','fbase','fnota','ordem'].forEach(id=>$(id).addEventListener('input',desenhar));
+    $('loteUsar').addEventListener('click',()=>lote('usar'));
+    $('loteIgn').addEventListener('click',()=>lote('ignorar'));
+    $('aplicarSug').addEventListener('click',aplicarSugestao);
+    $('recarregar').addEventListener('click',recarregar);
+  }
+  function filtrar(){
+    const q=norm($('busca').value.trim());
+    visiveis=GRUPOS.filter(g=>{
+      if(q && !norm(g.nome).includes(q)) return false;
+      if($('fcat').value && g.categoria!==$('fcat').value) return false;
+      if($('fdec').value && g.decisao_campanha!==$('fdec').value) return false;
+      if($('fbase').value && g.origem_lista!==$('fbase').value) return false;
+      if($('fnota').value==='sim' && !g.nota) return false;
+      return true;
+    });
+    const o=$('ordem').value;
+    if(o==='recente') visiveis.sort((a,b)=>(b.origem_lista||'').localeCompare(a.origem_lista||'')||b.qtd_membros-a.qtd_membros);
+    else if(o==='tamanho') visiveis.sort((a,b)=>b.qtd_membros-a.qtd_membros);
+    else visiveis.sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
+  }
+  function desenhar(){
+    filtrar();
+    const corpo=$('corpo'); corpo.innerHTML='';
+    const frag=document.createDocumentFragment();
+    visiveis.forEach(g=>{
+      const d=g.decisao_campanha;
+      const tr=document.createElement('tr');
+      if(d!=='pendente') tr.className=d;
+
+      const t1=document.createElement('td');
+      const box=document.createElement('div'); box.className='dec';
+      const bu=document.createElement('button'); bu.className='bu'; bu.textContent='Usar';
+      const bi=document.createElement('button'); bi.className='bi'; bi.textContent='Ignorar';
+      bu.setAttribute('aria-pressed',d==='usar'); bi.setAttribute('aria-pressed',d==='ignorar');
+      bu.addEventListener('click',()=>{ g.decisao_campanha = d==='usar'?'pendente':'usar'; gravar(g); desenhar(); });
+      bi.addEventListener('click',()=>{ g.decisao_campanha = d==='ignorar'?'pendente':'ignorar'; gravar(g); desenhar(); });
+      box.appendChild(bu); box.appendChild(bi); t1.appendChild(box); tr.appendChild(t1);
+
+      const t2=document.createElement('td'); t2.className='nome-grupo';
+      t2.appendChild(document.createTextNode(g.nome));
+      if(g.nota){ const s=document.createElement('span'); s.className='aviso-linha'; s.textContent=g.nota; t2.appendChild(s); }
+      const obs=document.createElement('input'); obs.type='text'; obs.className='obs';
+      obs.placeholder='observação (opcional): quem pediu, por quê';
+      obs.value=g.observacao_triagem;
+      let tmr; obs.addEventListener('input',()=>{
+        g.observacao_triagem=obs.value;
+        clearTimeout(tmr); tmr=setTimeout(()=>gravar(g),900);
+      });
+      t2.appendChild(obs); tr.appendChild(t2);
+
+      const t3=document.createElement('td');
+      const sel=document.createElement('select');
+      CATS.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=ROTULOS[c];
+        if(c===g.categoria)o.selected=true;sel.appendChild(o);});
+      sel.addEventListener('change',()=>{ g.categoria=sel.value; enriquecer(g); gravar(g); desenhar(); });
+      t3.appendChild(sel); tr.appendChild(t3);
+
+      const t4=document.createElement('td'); t4.className='num mem';
+      t4.textContent=g.qtd_membros.toLocaleString('pt-BR'); tr.appendChild(t4);
+
+      const t5=document.createElement('td'); t5.className='orig';
+      const tag=document.createElement('span'); tag.className='tag '+g.origem_lista;
+      tag.textContent = g.origem_lista==='setembro_2026' ? 'set/2026' : 'jul/2026';
+      t5.appendChild(tag); tr.appendChild(t5);
+
+      frag.appendChild(tr);
+    });
+    corpo.appendChild(frag);
+    $('vazio').style.display=visiveis.length?'none':'block';
+    placar();
+  }
+  function placar(){
+    const u=GRUPOS.filter(g=>g.decisao_campanha==='usar');
+    const i=GRUPOS.filter(g=>g.decisao_campanha==='ignorar');
+    $('pUsar').textContent=u.length.toLocaleString('pt-BR');
+    $('pIgn').textContent=i.length.toLocaleString('pt-BR');
+    $('pPend').textContent=(GRUPOS.length-u.length-i.length).toLocaleString('pt-BR');
+    $('pAlc').textContent=u.reduce((s,g)=>s+g.qtd_membros,0).toLocaleString('pt-BR');
+    $('pVis').textContent=visiveis.length.toLocaleString('pt-BR');
+    $('bpUsar').style.width=(GRUPOS.length?u.length/GRUPOS.length*100:0)+'%';
+    $('bpIgn').style.width=(GRUPOS.length?i.length/GRUPOS.length*100:0)+'%';
+    pintarSync();
+  }
+  function lote(valor){
+    const mudou=visiveis.filter(g=>g.decisao_campanha!==valor);
+    mudou.forEach(g=>g.decisao_campanha=valor);
+    desenhar(); gravarLote(mudou);
+  }
+  function aplicarSugestao(){
+    const alvo=GRUPOS.filter(g=>g.decisao_campanha==='pendente'&&g.sug!=='avaliar');
+    alvo.forEach(g=>g.decisao_campanha=g.sug);
+    desenhar(); gravarLote(alvo);
+    $('aplicarSug').textContent=alvo.length+' preenchidos';
+    setTimeout(()=>$('aplicarSug').textContent='Aplicar sugestão',2400);
+  }
+  async function recarregar(){
+    $('recarregar').textContent='…';
+    try{ const d=await feed('GET'); GRUPOS=(d.grupos||[]).map(enriquecer); falhou=0; desenhar(); }
+    catch(e){ falhou++; pintarSync(); }
+    finally{ $('recarregar').textContent='Recarregar'; }
+  }
+})();
+</script>
+</body>
+</html>
