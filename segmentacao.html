@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Segmentação · Renato Pellizzari 40004</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Barlow+Semi+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* extraídas do site oficial renatopellizzari.com.br (repo site-pellizzari) */
+  --creme:#f8e8c5; --papel:#fffdf7; --papel-2:#fcf3dd;
+  --cafe:#4c241a; --cafe-claro:#6b3626; --cafe-escuro:#2a130d;
+  --terracota:#c6430f; --laranja:#ff6b2d; --laranja-forte:#f0561a;
+  --amarelo:#fac730; --amarelo-claro:#fce185; --rosa:#ffe1d0;
+  --linha:#e7d4a8; --areia:#cbb08f;
+  --rodape-h:96px;
+}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{margin:0;background:var(--creme);color:var(--cafe);
+  font-family:"Barlow Semi Condensed",system-ui,sans-serif;font-size:17px;line-height:1.45;
+  -webkit-font-smoothing:antialiased;}
+h1,h2,h3{font-family:"Fredoka",sans-serif;font-weight:600;margin:0;}
+button,input,select{font-family:inherit;font-size:16px;color:var(--cafe);}
+input,select{background:var(--papel);border:1.5px solid var(--linha);border-radius:10px;padding:9px 12px;}
+input:focus,select:focus{outline:3px solid var(--laranja);outline-offset:1px;border-color:var(--laranja);}
+button{font-family:"Fredoka",sans-serif;font-weight:500;cursor:pointer;border-radius:999px;
+  border:1.5px solid var(--cafe);background:var(--papel);padding:9px 16px;transition:background .12s,color .12s;}
+button:hover:not(:disabled){background:var(--amarelo);}
+button:disabled{opacity:.45;cursor:not-allowed;}
+button.primario{background:var(--laranja);color:var(--papel);border-color:var(--laranja);
+  box-shadow:3px 3px 0 var(--cafe);}
+button.primario:hover:not(:disabled){background:var(--laranja-forte);color:var(--papel);}
+button.primario:active:not(:disabled){transform:translate(2px,2px);box-shadow:1px 1px 0 var(--cafe);}
+a{color:var(--terracota);}
+.oculto{display:none !important;}
+
+/* ---------------- porta ---------------- */
+#porta{max-width:430px;margin:0 auto;padding:10vh 20px 40px;}
+#porta img{width:min(300px,72vw);display:block;margin-bottom:6px;}
+#porta .urna{display:inline-block;background:var(--amarelo);color:var(--cafe);
+  font-family:"Fredoka",sans-serif;font-weight:700;padding:2px 12px;border-radius:8px;letter-spacing:.06em;}
+#porta h1{font-size:30px;color:var(--terracota);margin:20px 0 6px;}
+#porta p.sub{color:var(--cafe-claro);margin:0 0 22px;}
+#porta label{display:block;font-family:"Fredoka",sans-serif;font-size:15px;margin:14px 0 5px;}
+#porta input{width:100%;}
+#porta button{width:100%;margin-top:20px;padding:12px;font-size:17px;}
+.erro{color:var(--terracota);font-weight:600;margin-top:14px;min-height:1.4em;}
+
+/* ---------------- app ---------------- */
+#app{display:none;flex-direction:column;min-height:100%;padding-bottom:var(--rodape-h);}
+.topo{background:var(--papel);border-bottom:1px solid var(--linha);
+  box-shadow:0 2px 10px rgba(74,36,26,.07);position:sticky;top:0;z-index:40;}
+.topo-in{max-width:1180px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.topo img{height:34px;}
+.topo .urna{background:var(--amarelo);font-family:"Fredoka",sans-serif;font-weight:700;
+  padding:2px 10px;border-radius:7px;font-size:16px;letter-spacing:.05em;}
+.topo .quem{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:15px;color:var(--cafe-claro);}
+.topo .quem button{padding:5px 13px;font-size:14px;}
+
+.abas{max-width:1180px;margin:0 auto;padding:12px 16px 0;display:flex;gap:8px;flex-wrap:wrap;}
+.abas button{border-color:var(--linha);background:var(--papel-2);color:var(--cafe-claro);font-size:15.5px;}
+.abas button[aria-selected=true]{background:var(--rosa);color:var(--terracota);
+  border-color:var(--terracota);font-weight:600;}
+
+main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
+.painel-cab{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:10px;}
+.painel-cab h2{font-size:22px;color:var(--terracota);}
+.painel-cab .dica{color:var(--cafe-claro);font-size:15px;}
+
+.ferramentas{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-bottom:10px;}
+.ferramentas input[type=search]{flex:1 1 210px;min-width:150px;}
+.ferramentas button{font-size:14.5px;padding:8px 13px;}
+.contagem{font-size:15px;color:var(--cafe-claro);margin-bottom:8px;}
+.contagem b{font-family:"Fredoka",sans-serif;color:var(--cafe);font-variant-numeric:tabular-nums;}
+
+/* lista virtualizada da agenda */
+.cabecalho-lista{display:grid;grid-template-columns:34px 1fr 58px 132px;gap:8px;
+  padding:8px 12px;font-size:13.5px;font-weight:600;color:var(--cafe-claro);
+  text-transform:uppercase;letter-spacing:.05em;border-bottom:1.5px solid var(--linha);}
+#agScroll{height:min(58vh,560px);overflow-y:auto;background:var(--papel);
+  border:1px solid var(--linha);border-radius:12px;position:relative;}
+#agSpacer{position:relative;width:100%;}
+.linha{position:absolute;left:0;right:0;height:46px;display:grid;
+  grid-template-columns:34px 1fr 58px 132px;gap:8px;align-items:center;
+  padding:0 12px;border-bottom:1px solid var(--papel-2);cursor:pointer;}
+.linha:hover{background:var(--papel-2);}
+.linha.on{background:rgba(255,107,45,.11);}
+.linha input{width:19px;height:19px;accent-color:var(--laranja);margin:0;cursor:pointer;}
+.linha .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.linha .nm.vazio{color:var(--areia);font-style:italic;}
+.linha .dd,.linha .nu{font-variant-numeric:tabular-nums;color:var(--cafe-claro);font-size:16px;}
+.linha .nu{text-align:right;}
+.selo{display:inline-block;font-size:12px;font-weight:600;background:var(--papel-2);
+  color:var(--cafe-claro);border:1px solid var(--linha);border-radius:999px;
+  padding:0 7px;margin-left:6px;vertical-align:1px;white-space:nowrap;}
+
+/* grupos */
+.grade{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));}
+.card{background:var(--papel);border:1.5px solid var(--linha);border-radius:14px;
+  padding:12px 14px;display:flex;gap:10px;align-items:flex-start;cursor:pointer;}
+.card:hover{border-color:var(--areia);}
+.card.on{border-color:var(--laranja);background:rgba(255,107,45,.09);}
+.card input{width:19px;height:19px;accent-color:var(--laranja);margin:3px 0 0;flex-shrink:0;cursor:pointer;}
+.card .corpo{min-width:0;flex:1;display:block;}
+.card .g-nome{display:block;font-weight:600;word-break:break-word;line-height:1.25;}
+.card .g-desc{display:block;font-size:14.5px;color:var(--cafe-claro);margin-top:3px;}
+.card .g-meta{margin-top:7px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.tag{font-size:12.5px;border:1px solid var(--linha);border-radius:999px;padding:1px 9px;color:var(--cafe-claro);}
+.tag.cat{border-color:var(--terracota);color:var(--terracota);}
+.tag.qtd{background:var(--amarelo-claro);border-color:var(--amarelo);color:var(--cafe);font-weight:600;
+  font-variant-numeric:tabular-nums;}
+
+/* seleções salvas */
+.salvas{display:flex;flex-direction:column;gap:9px;}
+.salva{background:var(--papel);border:1.5px solid var(--linha);border-radius:12px;padding:12px 14px;
+  display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+.salva .s-nome{font-family:"Fredoka",sans-serif;font-weight:600;font-size:17.5px;}
+.salva .s-meta{color:var(--cafe-claro);font-size:14.5px;}
+.salva .s-acoes{margin-left:auto;display:flex;gap:7px;}
+.salva button{font-size:14px;padding:6px 13px;}
+.vazio-msg{color:var(--cafe-claro);padding:24px 0;}
+
+/* rodapé fixo */
+.rodape{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--papel);
+  border-top:2px solid var(--cafe);box-shadow:0 -3px 14px rgba(74,36,26,.13);}
+.rodape-in{max-width:1180px;margin:0 auto;padding:10px 16px;display:flex;gap:14px;
+  align-items:center;flex-wrap:wrap;}
+.placar{display:flex;gap:18px;flex-wrap:wrap;}
+.placar div{display:flex;flex-direction:column;line-height:1.1;}
+.placar b{font-family:"Fredoka",sans-serif;font-size:21px;font-variant-numeric:tabular-nums;}
+.placar span{font-size:12.5px;color:var(--cafe-claro);text-transform:uppercase;letter-spacing:.04em;}
+.placar .c1 b{color:var(--laranja);} .placar .c2 b{color:var(--terracota);} .placar .c3 b{color:var(--cafe);}
+.rodape .acoes{margin-left:auto;display:flex;gap:9px;align-items:center;flex-wrap:wrap;}
+.rodape input{min-width:190px;}
+.aviso{width:100%;font-size:14px;color:var(--terracota);min-height:0;}
+
+.carregando{padding:40px 0;text-align:center;color:var(--cafe-claro);}
+
+@media(max-width:720px){
+  :root{--rodape-h:150px;}
+  .cabecalho-lista,.linha{grid-template-columns:30px 1fr 46px 108px;}
+  .linha .nu{font-size:15px;}
+  .rodape .acoes{margin-left:0;width:100%;}
+  .rodape input{flex:1 1 auto;min-width:0;}
+  .placar{gap:14px;}
+  .placar b{font-size:19px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ PORTA ============ -->
+<section id="porta">
+  <img src="assets/logo-pellizzari.png" alt="Pellizzari">
+  <span class="urna">40004</span>
+  <h1>Painel de Segmentação</h1>
+  <p class="sub">Escolha o público de cada envio. Acesso restrito ao comitê.</p>
+  <form id="formLogin">
+    <label for="pEmail">E-mail</label>
+    <input type="email" id="pEmail" autocomplete="username" required>
+    <label for="pSenha">Senha</label>
+    <input type="password" id="pSenha" autocomplete="current-password" required>
+    <button class="primario" type="submit" id="btEntrar">Entrar</button>
+  </form>
+  <p class="erro" id="pErro"></p>
+</section>
+
+<!-- ============ APP ============ -->
+<div id="app">
+  <header class="topo">
+    <div class="topo-in">
+      <img src="assets/logo-pellizzari.png" alt="Pellizzari">
+      <span class="urna">40004</span>
+      <div class="quem"><span id="quemEmail"></span><button id="btSair">Sair</button></div>
+    </div>
+  </header>
+
+  <nav class="abas" role="tablist">
+    <button role="tab" data-aba="agenda"   aria-selected="true">Agenda</button>
+    <button role="tab" data-aba="grupos"   aria-selected="false">Grupos</button>
+    <button role="tab" data-aba="selecoes" aria-selected="false">Seleções salvas</button>
+  </nav>
+
+  <main>
+    <div id="carregando" class="carregando">Carregando a base…</div>
+
+    <!-- AGENDA -->
+    <section id="abaAgenda" class="oculto">
+      <div class="painel-cab">
+        <h2>Agenda do Renato</h2>
+        <span class="dica">Contatos sem WhatsApp começam desmarcados.</span>
+      </div>
+      <div class="ferramentas">
+        <input type="search" id="agBusca" placeholder="Buscar por nome ou número…" autocomplete="off">
+        <select id="agDdd"><option value="">Todos os DDDs</option></select>
+        <select id="agWa">
+          <option value="">Com e sem WhatsApp</option>
+          <option value="1">Só com WhatsApp</option>
+          <option value="0">Só sem WhatsApp</option>
+        </select>
+        <button id="agMarcar">Marcar filtrados</button>
+        <button id="agDesmarcar">Desmarcar filtrados</button>
+      </div>
+      <p class="contagem" id="agContagem"></p>
+      <div class="cabecalho-lista"><span></span><span>Nome</span><span>DDD</span><span style="text-align:right">Número</span></div>
+      <div id="agScroll"><div id="agSpacer"></div></div>
+    </section>
+
+    <!-- GRUPOS -->
+    <section id="abaGrupos" class="oculto">
+      <div class="painel-cab">
+        <h2>Grupos de setembro</h2>
+        <span class="dica">O grupo entra inteiro; a exclusão de um contato na agenda vence.</span>
+      </div>
+      <div class="ferramentas">
+        <input type="search" id="grBusca" placeholder="Buscar grupo…" autocomplete="off">
+        <select id="grOrdem">
+          <option value="qtd">Maiores primeiro</option>
+          <option value="qtd-asc">Menores primeiro</option>
+          <option value="nome">Nome (A–Z)</option>
+        </select>
+        <button id="grMarcar">Marcar filtrados</button>
+        <button id="grDesmarcar">Desmarcar filtrados</button>
+      </div>
+      <p class="contagem" id="grContagem"></p>
+      <div class="grade" id="grLista"></div>
+    </section>
+
+    <!-- SELEÇÕES -->
+    <section id="abaSelecoes" class="oculto">
+      <div class="painel-cab">
+        <h2>Seleções salvas</h2>
+        <span class="dica">Reabrir carrega as marcações. Duplicar abre uma cópia para editar.</span>
+      </div>
+      <div class="salvas" id="selLista"></div>
+    </section>
+  </main>
+
+  <footer class="rodape">
+    <div class="rodape-in">
+      <div class="placar">
+        <div class="c1"><b id="kpiContatos">0</b><span>contatos</span></div>
+        <div class="c2"><b id="kpiGrupos">0</b><span>grupos</span></div>
+        <div class="c3"><b id="kpiTotal">0</b><span>telefones únicos</span></div>
+      </div>
+      <div class="acoes">
+        <input type="text" id="selNome" placeholder="Nome da seleção" autocomplete="off" maxlength="120">
+        <button class="primario" id="btSalvar">Salvar seleção</button>
+        <button id="btCsv">Baixar CSV</button>
+      </div>
+      <p class="aviso" id="rodapeAviso"></p>
+    </div>
+  </footer>
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+const SUPABASE_URL = 'https://puihfdsshfpianxbjneg.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_wOd0D1ghQK35MpXXIpiPxQ_pS_3J-lO';
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const $ = s => document.querySelector(s);
+const nf = new Intl.NumberFormat('pt-BR');
+
+const st = {
+  agenda: [], grupos: [], membros: new Map(),   // grupo_id -> [chave_fone]
+  selC: new Set(), selG: new Set(),             // marcados
+  agFiltrada: [], grFiltrada: [],
+  selecaoAberta: null, salvas: []
+};
+
+/* ---------------- login ---------------- */
+$('#formLogin').addEventListener('submit', async e => {
+  e.preventDefault();
+  const bt = $('#btEntrar'); bt.disabled = true; $('#pErro').textContent = '';
+  const { error } = await sb.auth.signInWithPassword({
+    email: $('#pEmail').value.trim(), password: $('#pSenha').value
+  });
+  bt.disabled = false;
+  if (error) { $('#pErro').textContent = 'Não entrou: ' + error.message; return; }
+  abrirApp();
+});
+
+$('#btSair').addEventListener('click', async () => {
+  await sb.auth.signOut();
+  location.reload();
+});
+
+sb.auth.getSession().then(({ data }) => { if (data.session) abrirApp(); });
+
+async function abrirApp() {
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) return;
+  $('#porta').style.display = 'none';
+  $('#app').style.display = 'flex';
+  $('#quemEmail').textContent = user.email;
+  try { await carregarBase(); }
+  catch (e) { $('#carregando').textContent = 'Erro ao carregar: ' + e.message; }
+}
+
+/* ---------------- carga ---------------- */
+async function paginado(tabela, colunas, ordem) {
+  const passo = 1000, saida = [];
+  for (let de = 0; ; de += passo) {
+    const { data, error } = await sb.from(tabela).select(colunas)
+      .order(ordem, { ascending: true }).range(de, de + passo - 1);
+    if (error) throw error;
+    saida.push(...data);
+    if (data.length < passo) break;
+  }
+  return saida;
+}
+
+async function carregarBase() {
+  const [agenda, grupos, membros] = await Promise.all([
+    paginado('agenda_renato', 'id,telefone_e164,chave_fone,nome,ddd,numero,tem_whatsapp', 'id'),
+    paginado('vw_grupos_set2026', 'id,nome,descricao,categoria,qtd_contatos', 'id'),
+    paginado('grupo_membros_set2026', 'grupo_id,chave_fone', 'id')
+  ]);
+
+  st.agenda = agenda;
+  st.grupos = grupos;
+  for (const m of membros) {
+    let a = st.membros.get(m.grupo_id);
+    if (!a) { a = []; st.membros.set(m.grupo_id, a); }
+    a.push(m.chave_fone);
+  }
+
+  // padrão: quem tem WhatsApp entra; quem não tem, fica de fora.
+  st.selC = new Set(agenda.filter(c => c.tem_whatsapp).map(c => c.id));
+  st.selG = new Set();
+
+  const ddds = [...new Set(agenda.map(c => c.ddd).filter(d => d != null))].sort((a, b) => a - b);
+  $('#agDdd').insertAdjacentHTML('beforeend',
+    ddds.map(d => `<option value="${d}">DDD ${d}</option>`).join(''));
+
+  $('#carregando').remove();
+  filtrarAgenda(); filtrarGrupos(); placar(); await carregarSalvas();
+  mostrarAba('agenda');
+}
+
+/* ---------------- abas ---------------- */
+document.querySelectorAll('.abas button').forEach(b =>
+  b.addEventListener('click', () => mostrarAba(b.dataset.aba)));
+
+function mostrarAba(nome) {
+  document.querySelectorAll('.abas button').forEach(b =>
+    b.setAttribute('aria-selected', String(b.dataset.aba === nome)));
+  for (const [k, el] of [['agenda', '#abaAgenda'], ['grupos', '#abaGrupos'], ['selecoes', '#abaSelecoes']])
+    $(el).classList.toggle('oculto', k !== nome);
+  if (nome === 'agenda') desenharAgenda();
+}
+
+/* ---------------- agenda ---------------- */
+const semAcento = s => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+
+function filtrarAgenda() {
+  const q = semAcento($('#agBusca').value.trim());
+  const ddd = $('#agDdd').value;
+  const wa = $('#agWa').value;
+  st.agFiltrada = st.agenda.filter(c => {
+    if (ddd && String(c.ddd) !== ddd) return false;
+    if (wa === '1' && !c.tem_whatsapp) return false;
+    if (wa === '0' && c.tem_whatsapp) return false;
+    if (q && !semAcento(c.nome).includes(q) && !c.telefone_e164.includes(q)) return false;
+    return true;
+  });
+  $('#agScroll').scrollTop = 0;
+  $('#agContagem').innerHTML =
+    `<b>${nf.format(st.agFiltrada.length)}</b> de ${nf.format(st.agenda.length)} contatos ·
+     <b>${nf.format(st.agFiltrada.filter(c => st.selC.has(c.id)).length)}</b> marcados no filtro`;
+  desenharAgenda();
+}
+
+const ALT = 46;
+function fmtNum(c) {
+  const n = c.numero || '';
+  return n.length === 9 ? n.slice(0, 5) + '-' + n.slice(5)
+       : n.length === 8 ? n.slice(0, 4) + '-' + n.slice(4) : n;
+}
+
+function desenharAgenda() {
+  const sc = $('#agScroll'), sp = $('#agSpacer'), lista = st.agFiltrada;
+  sp.style.height = (lista.length * ALT) + 'px';
+  const ini = Math.max(0, Math.floor(sc.scrollTop / ALT) - 6);
+  const fim = Math.min(lista.length, Math.ceil((sc.scrollTop + sc.clientHeight) / ALT) + 6);
+  let html = '';
+  for (let i = ini; i < fim; i++) {
+    const c = lista[i], on = st.selC.has(c.id);
+    html += `<label class="linha${on ? ' on' : ''}" style="top:${i * ALT}px">
+      <input type="checkbox" data-id="${c.id}"${on ? ' checked' : ''}>
+      <span class="nm${c.nome ? '' : ' vazio'}">${c.nome ? esc(c.nome) : 'sem nome'}${
+        c.tem_whatsapp ? '' : '<em class="selo">sem WhatsApp</em>'}</span>
+      <span class="dd">${c.ddd ?? ''}</span>
+      <span class="nu">${fmtNum(c)}</span>
+    </label>`;
+  }
+  sp.innerHTML = html;
+}
+
+$('#agScroll').addEventListener('scroll', () => requestAnimationFrame(desenharAgenda));
+$('#agSpacer').addEventListener('change', e => {
+  const cb = e.target.closest('input[type=checkbox]'); if (!cb) return;
+  const id = Number(cb.dataset.id);
+  cb.checked ? st.selC.add(id) : st.selC.delete(id);
+  cb.closest('.linha').classList.toggle('on', cb.checked);
+  atualizarContagemAgenda(); placar();
+});
+['#agBusca', '#agDdd', '#agWa'].forEach(s =>
+  $(s).addEventListener('input', filtrarAgenda));
+
+function atualizarContagemAgenda() {
+  $('#agContagem').innerHTML =
+    `<b>${nf.format(st.agFiltrada.length)}</b> de ${nf.format(st.agenda.length)} contatos ·
+     <b>${nf.format(st.agFiltrada.filter(c => st.selC.has(c.id)).length)}</b> marcados no filtro`;
+}
+
+$('#agMarcar').addEventListener('click', () => {
+  st.agFiltrada.forEach(c => st.selC.add(c.id)); desenharAgenda(); atualizarContagemAgenda(); placar();
+});
+$('#agDesmarcar').addEventListener('click', () => {
+  st.agFiltrada.forEach(c => st.selC.delete(c.id)); desenharAgenda(); atualizarContagemAgenda(); placar();
+});
+
+/* ---------------- grupos ---------------- */
+function filtrarGrupos() {
+  const q = semAcento($('#grBusca').value.trim());
+  const ord = $('#grOrdem').value;
+  let l = st.grupos.filter(g => !q || semAcento(g.nome).includes(q) ||
+                                semAcento(g.categoria).includes(q) || semAcento(g.descricao).includes(q));
+  l.sort(ord === 'nome' ? (a, b) => a.nome.localeCompare(b.nome, 'pt-BR')
+      : ord === 'qtd-asc' ? (a, b) => a.qtd_contatos - b.qtd_contatos
+      : (a, b) => b.qtd_contatos - a.qtd_contatos);
+  st.grFiltrada = l;
+  $('#grContagem').innerHTML =
+    `<b>${nf.format(l.length)}</b> de ${nf.format(st.grupos.length)} grupos ·
+     <b>${nf.format(l.filter(g => st.selG.has(g.id)).length)}</b> marcados no filtro`;
+  $('#grLista').innerHTML = l.map(g => {
+    const on = st.selG.has(g.id);
+    return `<label class="card${on ? ' on' : ''}">
+      <input type="checkbox" data-id="${g.id}"${on ? ' checked' : ''}>
+      <span class="corpo">
+        <span class="g-nome">${esc(g.nome)}</span>
+        ${g.descricao ? `<span class="g-desc">${esc(g.descricao)}</span>` : ''}
+        <span class="g-meta">
+          <span class="tag qtd">${nf.format(g.qtd_contatos)} contatos</span>
+          ${g.categoria ? `<span class="tag cat">${esc(g.categoria)}</span>` : ''}
+        </span>
+      </span>
+    </label>`;
+  }).join('') || '<p class="vazio-msg">Nenhum grupo com esse filtro.</p>';
+}
+
+$('#grLista').addEventListener('change', e => {
+  const cb = e.target.closest('input[type=checkbox]'); if (!cb) return;
+  const id = Number(cb.dataset.id);
+  cb.checked ? st.selG.add(id) : st.selG.delete(id);
+  cb.closest('.card').classList.toggle('on', cb.checked);
+  atualizarContagemGrupos(); placar();
+});
+['#grBusca', '#grOrdem'].forEach(s => $(s).addEventListener('input', filtrarGrupos));
+$('#grMarcar').addEventListener('click', () => {
+  st.grFiltrada.forEach(g => st.selG.add(g.id)); filtrarGrupos(); placar();
+});
+$('#grDesmarcar').addEventListener('click', () => {
+  st.grFiltrada.forEach(g => st.selG.delete(g.id)); filtrarGrupos(); placar();
+});
+function atualizarContagemGrupos() {
+  $('#grContagem').innerHTML =
+    `<b>${nf.format(st.grFiltrada.length)}</b> de ${nf.format(st.grupos.length)} grupos ·
+     <b>${nf.format(st.grFiltrada.filter(g => st.selG.has(g.id)).length)}</b> marcados no filtro`;
+}
+
+/* ---------------- placar ao vivo ---------------- */
+// Mesma regra da lista final: contato desmarcado na agenda sai mesmo vindo por grupo.
+function totalUnico() {
+  const fora = new Set(), dentro = new Set();
+  for (const c of st.agenda)
+    (st.selC.has(c.id) ? dentro : fora).add(c.chave_fone);
+  for (const gid of st.selG)
+    for (const k of (st.membros.get(gid) || []))
+      if (!fora.has(k)) dentro.add(k);
+  return dentro.size;
+}
+
+let placarPend = false;
+function placar() {
+  if (placarPend) return;
+  placarPend = true;
+  requestAnimationFrame(() => {
+    placarPend = false;
+    $('#kpiContatos').textContent = nf.format(st.selC.size);
+    $('#kpiGrupos').textContent = nf.format(st.selG.size);
+    $('#kpiTotal').textContent = nf.format(totalUnico());
+  });
+}
+
+/* ---------------- salvar + CSV ---------------- */
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
+}
+function campoCsv(v) {
+  const s = String(v ?? '');
+  return /[;"\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+
+function montarCsv(selecaoId, selecaoNome) {
+  const linhas = ['selecao_id;selecao_nome;tipo;ref_id;nome;qtd_contatos;status'];
+  for (const c of st.agenda)
+    linhas.push([selecaoId, selecaoNome, 'contato', c.id, c.nome || '', 1,
+                 st.selC.has(c.id) ? 'incluido' : 'desconsiderado'].map(campoCsv).join(';'));
+  for (const g of st.grupos)
+    linhas.push([selecaoId, selecaoNome, 'grupo', g.id, g.nome, g.qtd_contatos,
+                 st.selG.has(g.id) ? 'incluido' : 'desconsiderado'].map(campoCsv).join(';'));
+  return '﻿' + linhas.join('\r\n') + '\r\n';
+}
+
+function baixar(nomeArquivo, texto) {
+  const url = URL.createObjectURL(new Blob([texto], { type: 'text/csv;charset=utf-8' }));
+  const a = document.createElement('a');
+  a.href = url; a.download = nomeArquivo; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+
+const arquivoSeguro = s => (s || 'selecao').normalize('NFD').replace(/[̀-ͯ]/g, '')
+  .replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-|-$/g, '').toLowerCase().slice(0, 60) || 'selecao';
+
+$('#btSalvar').addEventListener('click', async () => {
+  const nome = $('#selNome').value.trim();
+  if (!nome) { aviso('Dê um nome à seleção antes de salvar.'); $('#selNome').focus(); return; }
+  const bt = $('#btSalvar'); bt.disabled = true; aviso('Salvando…');
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    const { data: sel, error: e1 } = await sb.from('selecoes')
+      .insert({ nome, criado_por: user?.email ?? null }).select('id,nome,criado_em').single();
+    if (e1) throw e1;
+
+    const itens = [
+      ...st.agenda.map(c => ({ selecao_id: sel.id, tipo: 'contato', ref_id: c.id,
+        status: st.selC.has(c.id) ? 'incluido' : 'desconsiderado' })),
+      ...st.grupos.map(g => ({ selecao_id: sel.id, tipo: 'grupo', ref_id: g.id,
+        status: st.selG.has(g.id) ? 'incluido' : 'desconsiderado' }))
+    ];
+    for (let i = 0; i < itens.length; i += 1000) {
+      const { error } = await sb.from('selecao_itens').insert(itens.slice(i, i + 1000));
+      if (error) throw error;
+      aviso(`Salvando… ${nf.format(Math.min(i + 1000, itens.length))}/${nf.format(itens.length)}`);
+    }
+    baixar(`selecao-${arquivoSeguro(nome)}.csv`, montarCsv(sel.id, sel.nome));
+    st.selecaoAberta = sel.id;
+    await carregarSalvas();
+    aviso(`Seleção "${nome}" salva com ${nf.format(itens.length)} itens. CSV baixado.`);
+  } catch (err) {
+    aviso('Erro ao salvar: ' + err.message);
+  } finally { bt.disabled = false; }
+});
+
+$('#btCsv').addEventListener('click', () => {
+  const nome = $('#selNome').value.trim() || '(sem nome)';
+  baixar(`selecao-${arquivoSeguro(nome)}-previa.csv`, montarCsv(st.selecaoAberta ?? '', nome));
+  aviso('CSV de prévia baixado (não gravou seleção no banco).');
+});
+
+let avisoT;
+function aviso(txt) {
+  $('#rodapeAviso').textContent = txt;
+  clearTimeout(avisoT);
+  avisoT = setTimeout(() => { $('#rodapeAviso').textContent = ''; }, 9000);
+}
+
+/* ---------------- seleções salvas ---------------- */
+async function carregarSalvas() {
+  const { data, error } = await sb.from('selecoes')
+    .select('id,nome,criado_por,criado_em,observacao').order('criado_em', { ascending: false }).limit(60);
+  if (error) { $('#selLista').innerHTML = '<p class="vazio-msg">Erro: ' + esc(error.message) + '</p>'; return; }
+  st.salvas = data;
+  $('#selLista').innerHTML = data.length ? data.map(s => `
+    <div class="salva">
+      <span class="s-nome">${esc(s.nome)}</span>
+      <span class="s-meta">${new Date(s.criado_em).toLocaleString('pt-BR')}${
+        s.criado_por ? ' · ' + esc(s.criado_por) : ''}</span>
+      <span class="s-acoes">
+        <button data-acao="abrir" data-id="${s.id}">Reabrir</button>
+        <button data-acao="duplicar" data-id="${s.id}">Duplicar</button>
+        <button data-acao="csv" data-id="${s.id}">CSV</button>
+      </span>
+    </div>`).join('') : '<p class="vazio-msg">Nenhuma seleção salva ainda.</p>';
+}
+
+$('#selLista').addEventListener('click', async e => {
+  const bt = e.target.closest('button[data-acao]'); if (!bt) return;
+  const id = bt.dataset.id, sel = st.salvas.find(s => s.id === id);
+  bt.disabled = true;
+  try {
+    if (bt.dataset.acao === 'csv') { await aplicar(id, false); baixar(`selecao-${arquivoSeguro(sel.nome)}.csv`, montarCsv(id, sel.nome)); return; }
+    await aplicar(id, true);
+    if (bt.dataset.acao === 'duplicar') {
+      st.selecaoAberta = null;
+      $('#selNome').value = sel.nome + ' (cópia)';
+      aviso('Cópia aberta para edição. Salvar cria uma nova seleção.');
+    } else {
+      st.selecaoAberta = id;
+      $('#selNome').value = sel.nome;
+      aviso(`Seleção "${sel.nome}" reaberta.`);
+    }
+    mostrarAba('agenda');
+  } catch (err) { aviso('Erro: ' + err.message); }
+  finally { bt.disabled = false; }
+});
+
+async function aplicar(selecaoId, marcarUi) {
+  const passo = 1000, itens = [];
+  for (let de = 0; ; de += passo) {
+    const { data, error } = await sb.from('selecao_itens')
+      .select('tipo,ref_id,status').eq('selecao_id', selecaoId).eq('status', 'incluido')
+      .order('id', { ascending: true }).range(de, de + passo - 1);
+    if (error) throw error;
+    itens.push(...data);
+    if (data.length < passo) break;
+  }
+  st.selC = new Set(itens.filter(i => i.tipo === 'contato').map(i => i.ref_id));
+  st.selG = new Set(itens.filter(i => i.tipo === 'grupo').map(i => i.ref_id));
+  if (marcarUi) { filtrarAgenda(); filtrarGrupos(); }
+  placar();
+}
+
+/* O rodapé é fixo e muda de altura (aviso, quebra de linha no celular).
+   Mede e reserva o espaço exato para ele nunca cobrir a última linha. */
+const rodapeEl = document.querySelector('.rodape');
+const ajustarRodape = () =>
+  document.documentElement.style.setProperty('--rodape-h', (rodapeEl.offsetHeight + 10) + 'px');
+new ResizeObserver(ajustarRodape).observe(rodapeEl);
+ajustarRodape();
+
+/* Gancho de teste — só existe em localhost, nunca no GitHub Pages. */
+if (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+  window.__painel = { st, totalUnico, montarCsv, filtrarAgenda, filtrarGrupos, placar, mostrarAba };
+</script>
+</body>
+</html>
