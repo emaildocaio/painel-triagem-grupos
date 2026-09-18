@@ -122,6 +122,32 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
 .tag.qtd{background:var(--amarelo-claro);border-color:var(--amarelo);color:var(--cafe);font-weight:600;
   font-variant-numeric:tabular-nums;}
 
+/* como funciona */
+.ajuda{max-width:760px;}
+.ajuda h3{font-size:19px;color:var(--terracota);margin:26px 0 8px;}
+.ajuda h3:first-of-type{margin-top:8px;}
+.ajuda p{margin:0 0 10px;}
+.ajuda ul{margin:0 0 10px;padding-left:22px;}
+.ajuda li{margin-bottom:6px;}
+.ajuda .destaque{background:var(--rosa);border:2px solid var(--terracota);border-radius:14px;
+  padding:14px 18px;margin:0 0 20px;}
+.ajuda .destaque p{margin:0;font-size:17.5px;}
+.ajuda .destaque b{font-family:"Fredoka",sans-serif;color:var(--terracota);}
+.passos{counter-reset:passo;list-style:none;padding:0;margin:0 0 10px;}
+.passos li{counter-increment:passo;position:relative;padding:0 0 14px 44px;margin:0;}
+.passos li::before{content:counter(passo);position:absolute;left:0;top:-1px;
+  width:30px;height:30px;border-radius:50%;background:var(--laranja);color:var(--papel);
+  font-family:"Fredoka",sans-serif;font-weight:600;display:flex;align-items:center;justify-content:center;}
+.passos li b{font-family:"Fredoka",sans-serif;}
+.exemplo{background:var(--papel);border:1.5px solid var(--linha);border-radius:12px;
+  padding:12px 16px;margin:0 0 10px;font-size:16px;}
+.exemplo .conta{font-variant-numeric:tabular-nums;font-family:"Fredoka",sans-serif;
+  color:var(--terracota);font-size:17px;}
+.chip{display:inline-block;border:1.5px solid var(--linha);border-radius:999px;padding:0 10px;
+  background:var(--papel);font-size:14.5px;white-space:nowrap;}
+.chip.marcado{border-color:var(--terracota);background:var(--rosa);color:var(--terracota);
+  text-decoration:line-through;}
+
 /* seleções salvas */
 .salvas{display:flex;flex-direction:column;gap:9px;}
 .salva{background:var(--papel);border:1.5px solid var(--linha);border-radius:12px;padding:12px 14px;
@@ -191,6 +217,7 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
     <button role="tab" data-aba="agenda"   aria-selected="true">Agenda</button>
     <button role="tab" data-aba="grupos"   aria-selected="false">Grupos</button>
     <button role="tab" data-aba="selecoes" aria-selected="false">Seleções salvas</button>
+    <button role="tab" data-aba="ajuda"    aria-selected="false">Como funciona</button>
   </nav>
 
   <main>
@@ -238,6 +265,105 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
       </div>
       <p class="contagem" id="grContagem"></p>
       <div class="grade" id="grLista"></div>
+    </section>
+
+
+    <!-- COMO FUNCIONA -->
+    <section id="abaAjuda" class="oculto">
+      <div class="painel-cab"><h2>Como funciona</h2></div>
+      <div class="ajuda">
+
+        <div class="destaque">
+          <p><b>A regra de ouro:</b> aqui você marca quem <b>NÃO</b> vai receber.
+             Tudo que ficar desmarcado entra no envio.</p>
+        </div>
+
+        <p>Este painel serve para o comitê decidir, com calma e por escrito, quem recebe cada
+           disparo. Ele não envia nada — ele produz a lista e o registro da decisão.</p>
+
+        <h3>O passo a passo</h3>
+        <ol class="passos">
+          <li><b>Abra a aba Agenda.</b> São os 7.495 contatos do celular do Renato. Todo mundo
+              já começa dentro, menos quem não tem WhatsApp (esses vêm marcados). Marque quem
+              você não quer nesse envio: quem pediu para sair, fornecedor, contato pessoal,
+              número de empresa.</li>
+          <li><b>Vá para a aba Grupos.</b> São os 571 grupos de setembro. Todos começam dentro.
+              Marque os que não fazem sentido para essa mensagem.</li>
+          <li><b>Confira o rodapé.</b> Ele mostra o tamanho real do envio enquanto você marca.</li>
+          <li><b>Dê um nome à seleção</b> e clique em <b>Salvar seleção</b>. O painel grava a
+              decisão no banco e baixa o CSV na hora.</li>
+        </ol>
+
+        <h3>O que cada número do rodapé quer dizer</h3>
+        <ul>
+          <li><b>Contatos fora</b> — quantos contatos da agenda você marcou para não receber.</li>
+          <li><b>Grupos fora</b> — quantos grupos você marcou para não receber.</li>
+          <li><b>Telefones no envio</b> — o tamanho real da lista final. Já é o número
+              deduplicado: quem está em três grupos conta uma vez só.</li>
+        </ul>
+
+        <h3>Quando alguém está na agenda e num grupo ao mesmo tempo</h3>
+        <p>Acontece muito: 1.040 telefones estão nos dois lugares. A regra é simples e vale sempre:
+           <b>marcar na agenda tira da lista, mesmo que a pessoa venha por um grupo que ficou dentro.</b>
+           A exclusão vence.</p>
+        <div class="exemplo">
+          <p>Um grupo de 5 pessoas ficou dentro. Uma delas você marcou na agenda.</p>
+          <p class="conta">Resultado: 4 telefones no envio, não 5.</p>
+        </div>
+        <p>Isso existe para que o pedido de uma pessoa para não receber nada seja respeitado,
+           não importa por quantos grupos ela apareça.</p>
+
+        <h3>Como ler a tela</h3>
+        <ul>
+          <li><span class="chip">Nome normal</span> — está dentro, vai receber.</li>
+          <li><span class="chip marcado">Nome riscado</span> — está fora, não vai receber.
+              A linha fica apagada e listrada.</li>
+          <li>O selo <span class="chip">sem WhatsApp</span> marca quem não tem o aplicativo.
+              Esses já vêm fora por padrão, mas você pode devolver para a lista se quiser.</li>
+        </ul>
+
+        <h3>Os botões de filtro</h3>
+        <p>Busque ou filtre primeiro, depois use os botões — eles agem <b>só sobre o que está
+           na tela naquele momento</b>, nunca sobre a base inteira.</p>
+        <ul>
+          <li><b>Desconsiderar filtrados</b> — tira do envio tudo que o filtro mostrou.</li>
+          <li><b>Devolver filtrados</b> — traz de volta.</li>
+        </ul>
+        <p>Exemplo: filtre por DDD 11 e clique em "Desconsiderar filtrados" para tirar São Paulo
+           inteiro de um envio sobre o Rio.</p>
+
+        <h3>O CSV</h3>
+        <p>Ao salvar, o painel baixa um arquivo com <b>uma linha para cada contato e cada grupo</b>,
+           todos com o status <b>incluido</b> ou <b>desconsiderado</b>. Ele abre direto no Excel.</p>
+        <p>Esse arquivo é o registro auditável da decisão: seis meses depois dá para provar
+           exatamente quem estava dentro, quem ficou fora e quem decidiu. É por isso que ele lista
+           todo mundo, e não só os escolhidos.</p>
+        <p>O botão <b>Baixar CSV</b> sozinho gera só uma prévia, sem gravar nada. Para valer,
+           use <b>Salvar seleção</b>.</p>
+
+        <h3>Seleções salvas</h3>
+        <ul>
+          <li><b>Reabrir</b> — carrega aquelas marcações de volta na tela para você ajustar.</li>
+          <li><b>Duplicar</b> — abre uma cópia para editar sem mexer na original. Útil para
+              partir de um envio anterior.</li>
+          <li><b>CSV</b> — baixa de novo o arquivo daquela seleção.</li>
+        </ul>
+
+        <h3>E depois?</h3>
+        <p>O CSV da seleção vira a lista de envio: o sistema abre cada grupo que ficou dentro,
+           junta com os contatos da agenda que ficaram dentro, aplica a regra da exclusão,
+           remove telefone repetido e descarta o que não é celular brasileiro. O que sai é uma
+           lista de <b>nome, DDD e número</b>, pronta para o disparo.</p>
+
+        <h3>Cuidados</h3>
+        <ul>
+          <li>A lista tem dado pessoal de milhares de pessoas. Não repasse o CSV para fora do comitê.</li>
+          <li>Cada seleção fica registrada com o e-mail de quem salvou.</li>
+          <li>Na dúvida sobre incluir alguém, marque para fora: dá para devolver depois, mas
+              mensagem enviada não volta.</li>
+        </ul>
+
+      </div>
     </section>
 
     <!-- SELEÇÕES -->
@@ -361,7 +487,8 @@ document.querySelectorAll('.abas button').forEach(b =>
 function mostrarAba(nome) {
   document.querySelectorAll('.abas button').forEach(b =>
     b.setAttribute('aria-selected', String(b.dataset.aba === nome)));
-  for (const [k, el] of [['agenda', '#abaAgenda'], ['grupos', '#abaGrupos'], ['selecoes', '#abaSelecoes']])
+  for (const [k, el] of [['agenda', '#abaAgenda'], ['grupos', '#abaGrupos'],
+                         ['selecoes', '#abaSelecoes'], ['ajuda', '#abaAjuda']])
     $(el).classList.toggle('oculto', k !== nome);
   if (nome === 'agenda') desenharAgenda();
 }
