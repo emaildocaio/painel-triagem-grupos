@@ -1,0 +1,5 @@
+# Dados pessoais — nunca versionar (LGPD)
+*.csv
+*.vcf
+*.xlsx
+dados/
