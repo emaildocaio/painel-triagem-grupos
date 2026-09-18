@@ -104,6 +104,16 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
   color:var(--cafe-claro);border:1px solid var(--linha);border-radius:999px;
   padding:0 7px;margin-left:6px;vertical-align:1px;white-space:nowrap;}
 
+/* escola */
+#esScroll{height:min(58vh,560px);overflow-y:auto;background:var(--papel);
+  border:1px solid var(--linha);border-radius:12px;}
+#esScroll .linha{position:static;}
+.cabecalho-lista.cab-escola,#esScroll .linha{grid-template-columns:34px 1fr 150px 118px;}
+.es-serie{font-size:13.5px;color:var(--cafe-claro);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;}
+.linha.fora .es-serie{opacity:.45;}
+.selo.agenda{background:var(--amarelo-claro);border-color:var(--amarelo);color:var(--cafe);}
+
 /* grupos */
 .grade{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));}
 .card{background:var(--papel);border:1.5px solid var(--linha);border-radius:14px;
@@ -167,7 +177,8 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
 .placar div{display:flex;flex-direction:column;line-height:1.1;}
 .placar b{font-family:"Fredoka",sans-serif;font-size:21px;font-variant-numeric:tabular-nums;}
 .placar span{font-size:12.5px;color:var(--cafe-claro);text-transform:uppercase;letter-spacing:.04em;}
-.placar .c1 b{color:var(--terracota);} .placar .c2 b{color:var(--terracota);} .placar .c3 b{color:var(--laranja);}
+.placar .c1 b{color:var(--terracota);} .placar .c2 b{color:var(--terracota);}
+.placar .c4 b{color:var(--terracota);} .placar .c3 b{color:var(--laranja);}
 .rodape .acoes{margin-left:auto;display:flex;gap:9px;align-items:center;flex-wrap:wrap;}
 .rodape input{min-width:190px;}
 .aviso{width:100%;font-size:14px;color:var(--terracota);min-height:0;}
@@ -216,6 +227,7 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
   <nav class="abas" role="tablist">
     <button role="tab" data-aba="agenda"   aria-selected="true">Agenda</button>
     <button role="tab" data-aba="grupos"   aria-selected="false">Grupos</button>
+    <button role="tab" data-aba="escola"   aria-selected="false">Escola</button>
     <button role="tab" data-aba="selecoes" aria-selected="false">Seleções salvas</button>
     <button role="tab" data-aba="ajuda"    aria-selected="false">Como funciona</button>
   </nav>
@@ -268,6 +280,37 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
     </section>
 
 
+    <!-- ESCOLA -->
+    <section id="abaEscola" class="oculto">
+      <div class="painel-cab">
+        <h2>Colégio Intellectus</h2>
+      </div>
+      <p class="regra">Marque quem <b>NÃO</b> deve receber. São 511 telefones do colégio de Bangu:
+        responsáveis por alunos atuais e por ex-alunos. Quem também está na agenda leva o selo
+        <b>já na agenda</b> — marcar em qualquer uma das duas abas tira a pessoa do envio.</p>
+      <div class="ferramentas">
+        <input type="search" id="esBusca" placeholder="Buscar por nome ou número…" autocomplete="off">
+        <select id="esVinculo">
+          <option value="">Alunos e ex-alunos</option>
+          <option value="aluno">Só alunos atuais</option>
+          <option value="ex-aluno">Só ex-alunos</option>
+        </select>
+        <select id="esSerie"><option value="">Todas as séries</option></select>
+        <select id="esNovos">
+          <option value="">Todos os telefones</option>
+          <option value="1">Só quem só existe aqui</option>
+        </select>
+        <button id="esMarcar">Desconsiderar filtrados</button>
+        <button id="esDesmarcar">Devolver filtrados</button>
+      </div>
+      <p class="contagem" id="esContagem"></p>
+      <div class="cabecalho-lista cab-escola"><span></span><span>Nome</span><span>Série</span><span style="text-align:right">Número</span></div>
+      <div id="esScroll"></div>
+      <p class="contagem" style="margin-top:10px">Origem: extração de julho/2026 do cadastro do colégio,
+        já reduzida aos números com WhatsApp. Não é a base completa dos livros de matrícula
+        (801 pessoas / 692 domicílios), que continua fora do banco.</p>
+    </section>
+
     <!-- COMO FUNCIONA -->
     <section id="abaAjuda" class="oculto">
       <div class="painel-cab"><h2>Como funciona</h2></div>
@@ -289,6 +332,10 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
               número de empresa.</li>
           <li><b>Vá para a aba Grupos.</b> São os 571 grupos de setembro. Todos começam dentro.
               Marque os que não fazem sentido para essa mensagem.</li>
+          <li><b>Passe pela aba Escola.</b> São os 511 telefones do Colégio Intellectus (Bangu):
+              responsáveis por alunos atuais e por ex-alunos. Todos começam dentro, menos os
+              7 que não são celular. Dá para filtrar por série, por aluno/ex-aluno, e por quem
+              ainda não aparece na agenda nem em grupo.</li>
           <li><b>Confira o rodapé.</b> Ele mostra o tamanho real do envio enquanto você marca.</li>
           <li><b>Dê um nome à seleção</b> e clique em <b>Salvar seleção</b>. O painel grava a
               decisão no banco e baixa o CSV na hora.</li>
@@ -298,14 +345,16 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
         <ul>
           <li><b>Contatos fora</b> — quantos contatos da agenda você marcou para não receber.</li>
           <li><b>Grupos fora</b> — quantos grupos você marcou para não receber.</li>
+          <li><b>Escola fora</b> — quantos telefones do colégio você marcou para não receber.</li>
           <li><b>Telefones no envio</b> — o tamanho real da lista final. Já é o número
               deduplicado: quem está em três grupos conta uma vez só.</li>
         </ul>
 
-        <h3>Quando alguém está na agenda e num grupo ao mesmo tempo</h3>
-        <p>Acontece muito: 1.040 telefones estão nos dois lugares. A regra é simples e vale sempre:
-           <b>marcar na agenda tira da lista, mesmo que a pessoa venha por um grupo que ficou dentro.</b>
-           A exclusão vence.</p>
+        <h3>Quando a mesma pessoa aparece em mais de um lugar</h3>
+        <p>Acontece muito: 1.040 telefones estão na agenda e em grupo ao mesmo tempo, e 286 dos
+           511 da escola já estavam na agenda. A regra é simples e vale sempre:
+           <b>marcar numa aba de contato — Agenda ou Escola — tira a pessoa da lista, mesmo que
+           ela venha por um grupo que ficou dentro.</b> A exclusão vence, sempre.</p>
         <div class="exemplo">
           <p>Um grupo de 5 pessoas ficou dentro. Uma delas você marcou na agenda.</p>
           <p class="conta">Resultado: 4 telefones no envio, não 5.</p>
@@ -333,8 +382,10 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
            inteiro de um envio sobre o Rio.</p>
 
         <h3>O CSV</h3>
-        <p>Ao salvar, o painel baixa um arquivo com <b>uma linha para cada contato e cada grupo</b>,
-           todos com o status <b>incluido</b> ou <b>desconsiderado</b>. Ele abre direto no Excel.</p>
+        <p>Ao salvar, o painel baixa um arquivo com <b>uma linha para cada contato da agenda,
+           cada telefone da escola e cada grupo</b> — a coluna <b>tipo</b> diz qual é qual
+           (<b>contato</b>, <b>escola</b> ou <b>grupo</b>) — todos com o status <b>incluido</b>
+           ou <b>desconsiderado</b>. Ele abre direto no Excel.</p>
         <p>Esse arquivo é o registro auditável da decisão: seis meses depois dá para provar
            exatamente quem estava dentro, quem ficou fora e quem decidiu. É por isso que ele lista
            todo mundo, e não só os escolhidos.</p>
@@ -355,9 +406,24 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
            remove telefone repetido e descarta o que não é celular brasileiro. O que sai é uma
            lista de <b>nome, DDD e número</b>, pronta para o disparo.</p>
 
+        <h3>De onde vem cada base</h3>
+        <ul>
+          <li><b>Agenda</b> — export da agenda do celular do Renato, setembro/2026. São contatos dele.</li>
+          <li><b>Grupos</b> — os grupos de WhatsApp de que ele participa, exportados em setembro/2026.</li>
+          <li><b>Escola</b> — cadastro do Colégio Intellectus (Bangu), extração de julho/2026, já
+              reduzida aos números com WhatsApp. <b>Não</b> é a base completa dos livros de matrícula
+              (801 pessoas, 692 domicílios, extraída em 14/09) — essa continua só na planilha de
+              trabalho entregue à escola e ainda não foi carregada aqui.</li>
+        </ul>
+
         <h3>Cuidados</h3>
         <ul>
           <li>A lista tem dado pessoal de milhares de pessoas. Não repasse o CSV para fora do comitê.</li>
+          <li>Os telefones da escola foram dados ao colégio para matrícula, não para receber
+              mensagem de campanha. Antes de usar essa aba num disparo, confirme com o jurídico
+              qual é a base legal — especialmente para os ex-alunos, onde já não há relação
+              com a escola. Enquanto isso não estiver resolvido, o caminho seguro é marcar a
+              aba inteira para fora.</li>
           <li>Cada seleção fica registrada com o e-mail de quem salvou.</li>
           <li>Na dúvida sobre incluir alguém, marque para fora: dá para devolver depois, mas
               mensagem enviada não volta.</li>
@@ -381,6 +447,7 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
       <div class="placar">
         <div class="c1"><b id="kpiContatos">0</b><span>contatos fora</span></div>
         <div class="c2"><b id="kpiGrupos">0</b><span>grupos fora</span></div>
+        <div class="c4"><b id="kpiEscola">0</b><span>escola fora</span></div>
         <div class="c3"><b id="kpiTotal">0</b><span>telefones no envio</span></div>
       </div>
       <div class="acoes">
@@ -404,9 +471,9 @@ const $ = s => document.querySelector(s);
 const nf = new Intl.NumberFormat('pt-BR');
 
 const st = {
-  agenda: [], grupos: [], membros: new Map(),   // grupo_id -> [chave_fone]
-  excC: new Set(), excG: new Set(),             // MARCADOS = desconsiderados (fora do envio)
-  agFiltrada: [], grFiltrada: [],
+  agenda: [], grupos: [], escola: [], membros: new Map(),   // grupo_id -> [chave_fone]
+  excC: new Set(), excG: new Set(), excE: new Set(),        // MARCADOS = desconsiderados (fora do envio)
+  agFiltrada: [], grFiltrada: [], esFiltrada: [],
   selecaoAberta: null, salvas: []
 };
 
@@ -453,30 +520,46 @@ async function paginado(tabela, colunas, ordem) {
 }
 
 async function carregarBase() {
-  const [agenda, grupos, membros] = await Promise.all([
+  const [agenda, grupos, membros, escola] = await Promise.all([
     paginado('agenda_renato', 'id,telefone_e164,chave_fone,nome,ddd,numero,tem_whatsapp', 'id'),
     paginado('vw_grupos_set2026', 'id,nome,descricao,categoria,qtd_contatos', 'id'),
-    paginado('grupo_membros_set2026', 'grupo_id,chave_fone', 'id')
+    paginado('grupo_membros_set2026', 'grupo_id,chave_fone', 'id'),
+    paginado('escola_intellectus', 'id,telefone_e164,chave_fone,nome,ddd,numero,vinculo,series,celular', 'id')
   ]);
 
   st.agenda = agenda;
   st.grupos = grupos;
+  st.escola = escola;
   for (const m of membros) {
     let a = st.membros.get(m.grupo_id);
     if (!a) { a = []; st.membros.set(m.grupo_id, a); }
     a.push(m.chave_fone);
   }
 
-  // Marcar = deixar de fora. Padrão: todo mundo entra, menos quem não tem WhatsApp.
+  // Quem da escola já aparece na agenda ou em algum grupo — para o comitê enxergar a sobreposição.
+  const chavesAgenda = new Set(agenda.map(c => c.chave_fone));
+  const chavesGrupo = new Set(membros.map(m => m.chave_fone));
+  for (const p of st.escola) {
+    p.series = p.series || [];
+    p.naAgenda = chavesAgenda.has(p.chave_fone);
+    p.emGrupo = chavesGrupo.has(p.chave_fone);
+  }
+
+  // Marcar = deixar de fora. Padrão: todo mundo entra, menos quem não pode receber WhatsApp.
   st.excC = new Set(agenda.filter(c => !c.tem_whatsapp).map(c => c.id));
   st.excG = new Set();
+  st.excE = new Set(st.escola.filter(p => !p.celular).map(p => p.id));
 
   const ddds = [...new Set(agenda.map(c => c.ddd).filter(d => d != null))].sort((a, b) => a - b);
   $('#agDdd').insertAdjacentHTML('beforeend',
     ddds.map(d => `<option value="${d}">DDD ${d}</option>`).join(''));
 
+  const series = [...new Set(st.escola.flatMap(p => p.series))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  $('#esSerie').insertAdjacentHTML('beforeend',
+    series.map(x => `<option value="${esc(x)}">${esc(x)}</option>`).join(''));
+
   $('#carregando').remove();
-  filtrarAgenda(); filtrarGrupos(); placar(); await carregarSalvas();
+  filtrarAgenda(); filtrarGrupos(); filtrarEscola(); placar(); await carregarSalvas();
   mostrarAba('agenda');
 }
 
@@ -488,7 +571,8 @@ function mostrarAba(nome) {
   document.querySelectorAll('.abas button').forEach(b =>
     b.setAttribute('aria-selected', String(b.dataset.aba === nome)));
   for (const [k, el] of [['agenda', '#abaAgenda'], ['grupos', '#abaGrupos'],
-                         ['selecoes', '#abaSelecoes'], ['ajuda', '#abaAjuda']])
+                         ['escola', '#abaEscola'], ['selecoes', '#abaSelecoes'],
+                         ['ajuda', '#abaAjuda']])
     $(el).classList.toggle('oculto', k !== nome);
   if (nome === 'agenda') desenharAgenda();
 }
@@ -614,16 +698,75 @@ function atualizarContagemGrupos() {
      <b>${nf.format(st.grFiltrada.filter(g => st.excG.has(g.id)).length)}</b> fora no filtro`;
 }
 
+/* ---------------- escola ---------------- */
+const rotuloVinculo = v =>
+  v === 'ex-aluno' ? 'ex-aluno' : v === 'ambos' ? 'aluno e ex-aluno' : 'aluno atual';
+
+function filtrarEscola() {
+  const q = semAcento($('#esBusca').value.trim());
+  const vin = $('#esVinculo').value, serie = $('#esSerie').value, novos = $('#esNovos').value;
+  st.esFiltrada = st.escola.filter(p => {
+    if (vin && p.vinculo !== vin && p.vinculo !== 'ambos') return false;
+    if (serie && !p.series.includes(serie)) return false;
+    if (novos === '1' && (p.naAgenda || p.emGrupo)) return false;
+    if (q && !semAcento(p.nome).includes(q) && !p.telefone_e164.includes(q)) return false;
+    return true;
+  });
+  $('#esScroll').scrollTop = 0;
+  desenharEscola(); atualizarContagemEscola();
+}
+
+function desenharEscola() {
+  $('#esScroll').innerHTML = st.esFiltrada.map(p => {
+    const fora = st.excE.has(p.id);
+    return `<label class="linha${fora ? ' fora' : ''}" title="${fora ? 'Fora do envio' : 'Entra no envio'}">
+      <input type="checkbox" data-id="${p.id}"${fora ? ' checked' : ''}>
+      <span class="nm${p.nome ? '' : ' vazio'}">${p.nome ? esc(p.nome) : 'sem nome'}<em class="selo">${
+        rotuloVinculo(p.vinculo)}</em>${p.celular ? '' : '<em class="selo">não é celular</em>'}${
+        p.naAgenda ? '<em class="selo agenda">já na agenda</em>' : ''}</span>
+      <span class="es-serie">${p.series.length ? esc(p.series.join(', ')) : '—'}</span>
+      <span class="nu">${fmtNum(p)}</span>
+    </label>`;
+  }).join('') || '<p class="vazio-msg">Ninguém com esse filtro.</p>';
+}
+
+function atualizarContagemEscola() {
+  const l = st.esFiltrada;
+  $('#esContagem').innerHTML =
+    `<b>${nf.format(l.length)}</b> de ${nf.format(st.escola.length)} telefones ·
+     <b>${nf.format(l.filter(p => st.excE.has(p.id)).length)}</b> fora no filtro ·
+     <b>${nf.format(l.filter(p => !p.naAgenda && !p.emGrupo).length)}</b> que só existem aqui`;
+}
+
+$('#esScroll').addEventListener('change', e => {
+  const cb = e.target.closest('input[type=checkbox]'); if (!cb) return;
+  const id = Number(cb.dataset.id);
+  cb.checked ? st.excE.add(id) : st.excE.delete(id);
+  cb.closest('.linha').classList.toggle('fora', cb.checked);
+  atualizarContagemEscola(); placar();
+});
+['#esBusca', '#esVinculo', '#esSerie', '#esNovos'].forEach(x =>
+  $(x).addEventListener('input', filtrarEscola));
+$('#esMarcar').addEventListener('click', () => {
+  st.esFiltrada.forEach(p => st.excE.add(p.id)); desenharEscola(); atualizarContagemEscola(); placar();
+});
+$('#esDesmarcar').addEventListener('click', () => {
+  st.esFiltrada.forEach(p => st.excE.delete(p.id)); desenharEscola(); atualizarContagemEscola(); placar();
+});
+
 /* ---------------- placar ao vivo ---------------- */
-// Mesma regra da lista final: contato desconsiderado na agenda sai mesmo vindo por grupo.
+// Mesma regra da lista final: telefone marcado num nível de contato (agenda ou escola)
+// sai do envio mesmo que venha por um grupo que ficou dentro. A exclusão sempre vence.
 function totalUnico() {
   const fora = new Set(), dentro = new Set();
-  for (const c of st.agenda)
-    (st.excC.has(c.id) ? fora : dentro).add(c.chave_fone);
+  for (const c of st.agenda) if (st.excC.has(c.id)) fora.add(c.chave_fone);
+  for (const p of st.escola) if (st.excE.has(p.id)) fora.add(p.chave_fone);
+  for (const c of st.agenda) if (!fora.has(c.chave_fone)) dentro.add(c.chave_fone);
+  for (const p of st.escola) if (!fora.has(p.chave_fone)) dentro.add(p.chave_fone);
   for (const g of st.grupos) {
     if (st.excG.has(g.id)) continue;               // grupo desconsiderado não entra
     for (const k of (st.membros.get(g.id) || []))
-      if (!fora.has(k)) dentro.add(k);             // exclusão da agenda vence
+      if (!fora.has(k)) dentro.add(k);             // exclusão de contato vence
   }
   return dentro.size;
 }
@@ -636,6 +779,7 @@ function placar() {
     placarPend = false;
     $('#kpiContatos').textContent = nf.format(st.excC.size);
     $('#kpiGrupos').textContent = nf.format(st.excG.size);
+    $('#kpiEscola').textContent = nf.format(st.excE.size);
     $('#kpiTotal').textContent = nf.format(totalUnico());
   });
 }
@@ -654,6 +798,9 @@ function montarCsv(selecaoId, selecaoNome) {
   for (const c of st.agenda)
     linhas.push([selecaoId, selecaoNome, 'contato', c.id, c.nome || '', 1,
                  st.excC.has(c.id) ? 'desconsiderado' : 'incluido'].map(campoCsv).join(';'));
+  for (const p of st.escola)
+    linhas.push([selecaoId, selecaoNome, 'escola', p.id, p.nome || '', 1,
+                 st.excE.has(p.id) ? 'desconsiderado' : 'incluido'].map(campoCsv).join(';'));
   for (const g of st.grupos)
     linhas.push([selecaoId, selecaoNome, 'grupo', g.id, g.nome, g.qtd_contatos,
                  st.excG.has(g.id) ? 'desconsiderado' : 'incluido'].map(campoCsv).join(';'));
@@ -683,6 +830,8 @@ $('#btSalvar').addEventListener('click', async () => {
     const itens = [
       ...st.agenda.map(c => ({ selecao_id: sel.id, tipo: 'contato', ref_id: c.id,
         status: st.excC.has(c.id) ? 'desconsiderado' : 'incluido' })),
+      ...st.escola.map(p => ({ selecao_id: sel.id, tipo: 'escola', ref_id: p.id,
+        status: st.excE.has(p.id) ? 'desconsiderado' : 'incluido' })),
       ...st.grupos.map(g => ({ selecao_id: sel.id, tipo: 'grupo', ref_id: g.id,
         status: st.excG.has(g.id) ? 'desconsiderado' : 'incluido' }))
     ];
@@ -765,7 +914,8 @@ async function aplicar(selecaoId, marcarUi) {
   }
   st.excC = new Set(itens.filter(i => i.tipo === 'contato').map(i => i.ref_id));
   st.excG = new Set(itens.filter(i => i.tipo === 'grupo').map(i => i.ref_id));
-  if (marcarUi) { filtrarAgenda(); filtrarGrupos(); }
+  st.excE = new Set(itens.filter(i => i.tipo === 'escola').map(i => i.ref_id));
+  if (marcarUi) { filtrarAgenda(); filtrarGrupos(); filtrarEscola(); }
   placar();
 }
 
@@ -779,7 +929,8 @@ ajustarRodape();
 
 /* Gancho de teste — só existe em localhost, nunca no GitHub Pages. */
 if (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
-  window.__painel = { st, totalUnico, montarCsv, filtrarAgenda, filtrarGrupos, placar, mostrarAba };
+  window.__painel = { st, totalUnico, montarCsv, filtrarAgenda, filtrarGrupos,
+                      filtrarEscola, placar, mostrarAba };
 </script>
 </body>
 </html>
