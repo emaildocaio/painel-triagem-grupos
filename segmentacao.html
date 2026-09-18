@@ -121,7 +121,7 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
 .card:hover{border-color:var(--areia);}
 .card.fora{border-color:var(--areia);background:repeating-linear-gradient(135deg,var(--papel),var(--papel) 7px,rgba(198,67,15,.06) 7px,rgba(198,67,15,.06) 14px);}
 .card.fora .g-nome{text-decoration:line-through;color:var(--areia);}
-.card.fora .g-desc,.card.fora .g-meta{opacity:.5;}
+.card.fora .g-desc,.card.fora .g-meta .tag:not(.nunca):not(.depois){opacity:.5;}
 .card input{width:19px;height:19px;accent-color:var(--terracota);margin:3px 0 0;flex-shrink:0;cursor:pointer;}
 .card .corpo{min-width:0;flex:1;display:block;}
 .card .g-nome{display:block;font-weight:600;word-break:break-word;line-height:1.25;}
@@ -129,6 +129,8 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
 .card .g-meta{margin-top:7px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
 .tag{font-size:12.5px;border:1px solid var(--linha);border-radius:999px;padding:1px 9px;color:var(--cafe-claro);}
 .tag.cat{border-color:var(--terracota);color:var(--terracota);}
+.tag.nunca{background:var(--terracota);border-color:var(--terracota);color:#fff;font-weight:600;}
+.tag.depois{background:var(--rosa);border-color:var(--terracota);color:var(--terracota);font-weight:600;}
 .tag.qtd{background:var(--amarelo-claro);border-color:var(--amarelo);color:var(--cafe);font-weight:600;
   font-variant-numeric:tabular-nums;}
 
@@ -264,9 +266,18 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
         <h2>Grupos de setembro</h2>
       </div>
       <p class="regra">Marque os grupos que <b>NÃO</b> devem receber. Os desmarcados entram inteiros —
-        e mesmo assim um contato marcado na agenda continua fora.</p>
+        e mesmo assim um contato marcado na agenda continua fora.
+        Os grupos com o selo <b>nunca</b> ou <b>só depois</b> já vêm marcados por decisão do comitê:
+        os de <b>nunca</b> não devem ser desmarcados; os de <b>só depois</b> podem voltar numa
+        campanha futura.</p>
       <div class="ferramentas">
         <input type="search" id="grBusca" placeholder="Buscar grupo…" autocomplete="off">
+        <select id="grBloqueio">
+          <option value="">Todos os grupos</option>
+          <option value="nunca">Só os bloqueados para sempre</option>
+          <option value="campanha_atual">Só os fora desta campanha</option>
+          <option value="livres">Só os que estão liberados</option>
+        </select>
         <select id="grOrdem">
           <option value="qtd">Maiores primeiro</option>
           <option value="qtd-asc">Menores primeiro</option>
@@ -330,8 +341,9 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
               já começa dentro, menos quem não tem WhatsApp (esses vêm marcados). Marque quem
               você não quer nesse envio: quem pediu para sair, fornecedor, contato pessoal,
               número de empresa.</li>
-          <li><b>Vá para a aba Grupos.</b> São os 571 grupos de setembro. Todos começam dentro.
-              Marque os que não fazem sentido para essa mensagem.</li>
+          <li><b>Vá para a aba Grupos.</b> São os 571 grupos de setembro. Começam dentro, menos
+              os 11 que o comitê já bloqueou (veja abaixo). Marque os outros que não fazem
+              sentido para essa mensagem.</li>
           <li><b>Passe pela aba Escola.</b> São os 511 telefones do Colégio Intellectus (Bangu):
               responsáveis por alunos atuais e por ex-alunos. Todos começam dentro, menos os
               7 que não são celular. Dá para filtrar por série, por aluno/ex-aluno, e por quem
@@ -349,6 +361,29 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
           <li><b>Telefones no envio</b> — o tamanho real da lista final. Já é o número
               deduplicado: quem está em três grupos conta uma vez só.</li>
         </ul>
+
+        <h3>Os grupos já bloqueados</h3>
+        <p>O comitê já decidiu sobre 11 grupos, e eles aparecem marcados desde que a tela abre.
+           São dois selos diferentes:</p>
+        <ul>
+          <li><span class="chip">nunca</span> — 8 grupos, 462 contatos. Não recebem em
+              <b>nenhuma</b> campanha. Se alguém desmarcar e salvar, o painel devolve para fora
+              na próxima vez que a seleção for aberta.</li>
+          <li><span class="chip">só depois</span> — 3 grupos, 788 contatos. Estão fora
+              <b>desta</b> campanha, mas podem voltar numa futura. Aí é só desmarcar.</li>
+        </ul>
+        <p>O filtro da aba Grupos tem uma opção para ver só os bloqueados, ou só os liberados.</p>
+        <div class="exemplo">
+          <p>Fora por <b>nunca</b>: Candidatos Dep Estadual PSB 2026 · Arrancada final EP 2026 ·
+             Região dos Lagos com Elias Jabbour · Elias Jabbour - Rio de Janeiro 2 ·
+             Esquerda Unida do RJ · Estágio 2026.1 - História · APALCA VICUÑA 2025 ·
+             Planetário_Energia_ACL</p>
+          <p>Fora por <b>só depois</b>: Comércio Pça da Bandeira · EDUDUCAÇÃO 📗🎒 ·
+             Estacionamento VASCO</p>
+          <p class="conta">1.201 telefones distintos — 916 deles não entram por nenhum outro grupo.</p>
+        </div>
+        <p>Atenção: 72 dessas pessoas também estão na agenda do Renato. Tirar o grupo não tira
+           quem já era contato dele — para esses, marque também na aba Agenda.</p>
 
         <h3>Quando a mesma pessoa aparece em mais de um lugar</h3>
         <p>Acontece muito: 1.040 telefones estão na agenda e em grupo ao mesmo tempo, e 286 dos
@@ -522,7 +557,7 @@ async function paginado(tabela, colunas, ordem) {
 async function carregarBase() {
   const [agenda, grupos, membros, escola] = await Promise.all([
     paginado('agenda_renato', 'id,telefone_e164,chave_fone,nome,ddd,numero,tem_whatsapp', 'id'),
-    paginado('vw_grupos_set2026', 'id,nome,descricao,categoria,qtd_contatos', 'id'),
+    paginado('vw_grupos_set2026', 'id,nome,descricao,categoria,qtd_contatos,bloqueio', 'id'),
     paginado('grupo_membros_set2026', 'grupo_id,chave_fone', 'id'),
     paginado('escola_intellectus', 'id,telefone_e164,chave_fone,nome,ddd,numero,vinculo,series,celular', 'id')
   ]);
@@ -547,7 +582,7 @@ async function carregarBase() {
 
   // Marcar = deixar de fora. Padrão: todo mundo entra, menos quem não pode receber WhatsApp.
   st.excC = new Set(agenda.filter(c => !c.tem_whatsapp).map(c => c.id));
-  st.excG = new Set();
+  st.excG = new Set(grupos.filter(g => g.bloqueio).map(g => g.id));   // decisão já tomada pelo comitê
   st.excE = new Set(st.escola.filter(p => !p.celular).map(p => p.id));
 
   const ddds = [...new Set(agenda.map(c => c.ddd).filter(d => d != null))].sort((a, b) => a - b);
@@ -653,8 +688,12 @@ $('#agDesmarcar').addEventListener('click', () => {
 function filtrarGrupos() {
   const q = semAcento($('#grBusca').value.trim());
   const ord = $('#grOrdem').value;
-  let l = st.grupos.filter(g => !q || semAcento(g.nome).includes(q) ||
-                                semAcento(g.categoria).includes(q) || semAcento(g.descricao).includes(q));
+  const blo = $('#grBloqueio').value;
+  let l = st.grupos.filter(g => {
+    if (blo === 'livres' ? g.bloqueio : blo && g.bloqueio !== blo) return false;
+    return !q || semAcento(g.nome).includes(q) ||
+                 semAcento(g.categoria).includes(q) || semAcento(g.descricao).includes(q);
+  });
   l.sort(ord === 'nome' ? (a, b) => a.nome.localeCompare(b.nome, 'pt-BR')
       : ord === 'qtd-asc' ? (a, b) => a.qtd_contatos - b.qtd_contatos
       : (a, b) => b.qtd_contatos - a.qtd_contatos);
@@ -671,6 +710,8 @@ function filtrarGrupos() {
         ${g.descricao ? `<span class="g-desc">${esc(g.descricao)}</span>` : ''}
         <span class="g-meta">
           <span class="tag qtd">${nf.format(g.qtd_contatos)} contatos</span>
+          ${g.bloqueio === 'nunca' ? '<span class="tag nunca">nunca</span>' : ''}
+          ${g.bloqueio === 'campanha_atual' ? '<span class="tag depois">só depois</span>' : ''}
           ${g.categoria ? `<span class="tag cat">${esc(g.categoria)}</span>` : ''}
         </span>
       </span>
@@ -685,7 +726,7 @@ $('#grLista').addEventListener('change', e => {
   cb.closest('.card').classList.toggle('fora', cb.checked);
   atualizarContagemGrupos(); placar();
 });
-['#grBusca', '#grOrdem'].forEach(s => $(s).addEventListener('input', filtrarGrupos));
+['#grBusca', '#grOrdem', '#grBloqueio'].forEach(s => $(s).addEventListener('input', filtrarGrupos));
 $('#grMarcar').addEventListener('click', () => {
   st.grFiltrada.forEach(g => st.excG.add(g.id)); filtrarGrupos(); placar();
 });
@@ -914,9 +955,15 @@ async function aplicar(selecaoId, marcarUi) {
   }
   st.excC = new Set(itens.filter(i => i.tipo === 'contato').map(i => i.ref_id));
   st.excG = new Set(itens.filter(i => i.tipo === 'grupo').map(i => i.ref_id));
+  // "nunca" vale para qualquer campanha: se a seleção salva deixou algum dentro, volta para fora.
+  let readicionados = 0;
+  for (const g of st.grupos)
+    if (g.bloqueio === 'nunca' && !st.excG.has(g.id)) { st.excG.add(g.id); readicionados++; }
   st.excE = new Set(itens.filter(i => i.tipo === 'escola').map(i => i.ref_id));
   if (marcarUi) { filtrarAgenda(); filtrarGrupos(); filtrarEscola(); }
   placar();
+  if (readicionados)
+    aviso(`${readicionados} grupo(s) com o selo "nunca" voltaram para fora do envio.`);
 }
 
 /* O rodapé é fixo e muda de altura (aviso, quebra de linha no celular).
