@@ -70,6 +70,9 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
 .painel-cab{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:10px;}
 .painel-cab h2{font-size:22px;color:var(--terracota);}
 .painel-cab .dica{color:var(--cafe-claro);font-size:15px;}
+.regra{background:var(--rosa);border:1.5px solid var(--terracota);border-radius:12px;
+  padding:9px 14px;margin-bottom:12px;font-size:15.5px;color:var(--cafe);}
+.regra b{font-family:"Fredoka",sans-serif;color:var(--terracota);}
 
 .ferramentas{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-bottom:10px;}
 .ferramentas input[type=search]{flex:1 1 210px;min-width:150px;}
@@ -88,12 +91,15 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
   grid-template-columns:34px 1fr 58px 132px;gap:8px;align-items:center;
   padding:0 12px;border-bottom:1px solid var(--papel-2);cursor:pointer;}
 .linha:hover{background:var(--papel-2);}
-.linha.on{background:rgba(255,107,45,.11);}
-.linha input{width:19px;height:19px;accent-color:var(--laranja);margin:0;cursor:pointer;}
+.linha.fora{background:repeating-linear-gradient(135deg,transparent,transparent 7px,rgba(198,67,15,.06) 7px,rgba(198,67,15,.06) 14px);}
+.linha.fora .nm{text-decoration:line-through;color:var(--areia);}
+.linha.fora .dd,.linha.fora .nu{opacity:.45;}
+.linha input{width:19px;height:19px;accent-color:var(--terracota);margin:0;cursor:pointer;}
 .linha .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .linha .nm.vazio{color:var(--areia);font-style:italic;}
 .linha .dd,.linha .nu{font-variant-numeric:tabular-nums;color:var(--cafe-claro);font-size:16px;}
 .linha .nu{text-align:right;}
+.selo.fora{background:var(--rosa);border-color:var(--terracota);color:var(--terracota);}
 .selo{display:inline-block;font-size:12px;font-weight:600;background:var(--papel-2);
   color:var(--cafe-claro);border:1px solid var(--linha);border-radius:999px;
   padding:0 7px;margin-left:6px;vertical-align:1px;white-space:nowrap;}
@@ -103,8 +109,10 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
 .card{background:var(--papel);border:1.5px solid var(--linha);border-radius:14px;
   padding:12px 14px;display:flex;gap:10px;align-items:flex-start;cursor:pointer;}
 .card:hover{border-color:var(--areia);}
-.card.on{border-color:var(--laranja);background:rgba(255,107,45,.09);}
-.card input{width:19px;height:19px;accent-color:var(--laranja);margin:3px 0 0;flex-shrink:0;cursor:pointer;}
+.card.fora{border-color:var(--areia);background:repeating-linear-gradient(135deg,var(--papel),var(--papel) 7px,rgba(198,67,15,.06) 7px,rgba(198,67,15,.06) 14px);}
+.card.fora .g-nome{text-decoration:line-through;color:var(--areia);}
+.card.fora .g-desc,.card.fora .g-meta{opacity:.5;}
+.card input{width:19px;height:19px;accent-color:var(--terracota);margin:3px 0 0;flex-shrink:0;cursor:pointer;}
 .card .corpo{min-width:0;flex:1;display:block;}
 .card .g-nome{display:block;font-weight:600;word-break:break-word;line-height:1.25;}
 .card .g-desc{display:block;font-size:14.5px;color:var(--cafe-claro);margin-top:3px;}
@@ -133,7 +141,7 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
 .placar div{display:flex;flex-direction:column;line-height:1.1;}
 .placar b{font-family:"Fredoka",sans-serif;font-size:21px;font-variant-numeric:tabular-nums;}
 .placar span{font-size:12.5px;color:var(--cafe-claro);text-transform:uppercase;letter-spacing:.04em;}
-.placar .c1 b{color:var(--laranja);} .placar .c2 b{color:var(--terracota);} .placar .c3 b{color:var(--cafe);}
+.placar .c1 b{color:var(--terracota);} .placar .c2 b{color:var(--terracota);} .placar .c3 b{color:var(--laranja);}
 .rodape .acoes{margin-left:auto;display:flex;gap:9px;align-items:center;flex-wrap:wrap;}
 .rodape input{min-width:190px;}
 .aviso{width:100%;font-size:14px;color:var(--terracota);min-height:0;}
@@ -158,7 +166,7 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
   <img src="assets/logo-pellizzari.png" alt="Pellizzari">
   <span class="urna">40004</span>
   <h1>Painel de Segmentação</h1>
-  <p class="sub">Escolha o público de cada envio. Acesso restrito ao comitê.</p>
+  <p class="sub">Defina quem fica de fora de cada envio. Acesso restrito ao comitê.</p>
   <form id="formLogin">
     <label for="pEmail">E-mail</label>
     <input type="email" id="pEmail" autocomplete="username" required>
@@ -192,8 +200,9 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
     <section id="abaAgenda" class="oculto">
       <div class="painel-cab">
         <h2>Agenda do Renato</h2>
-        <span class="dica">Contatos sem WhatsApp começam desmarcados.</span>
       </div>
+      <p class="regra">Marque quem <b>NÃO</b> deve receber. Tudo que ficar desmarcado entra no envio.
+        Contatos sem WhatsApp já vêm marcados.</p>
       <div class="ferramentas">
         <input type="search" id="agBusca" placeholder="Buscar por nome ou número…" autocomplete="off">
         <select id="agDdd"><option value="">Todos os DDDs</option></select>
@@ -202,8 +211,8 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
           <option value="1">Só com WhatsApp</option>
           <option value="0">Só sem WhatsApp</option>
         </select>
-        <button id="agMarcar">Marcar filtrados</button>
-        <button id="agDesmarcar">Desmarcar filtrados</button>
+        <button id="agMarcar">Desconsiderar filtrados</button>
+        <button id="agDesmarcar">Devolver filtrados</button>
       </div>
       <p class="contagem" id="agContagem"></p>
       <div class="cabecalho-lista"><span></span><span>Nome</span><span>DDD</span><span style="text-align:right">Número</span></div>
@@ -214,8 +223,9 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
     <section id="abaGrupos" class="oculto">
       <div class="painel-cab">
         <h2>Grupos de setembro</h2>
-        <span class="dica">O grupo entra inteiro; a exclusão de um contato na agenda vence.</span>
       </div>
+      <p class="regra">Marque os grupos que <b>NÃO</b> devem receber. Os desmarcados entram inteiros —
+        e mesmo assim um contato marcado na agenda continua fora.</p>
       <div class="ferramentas">
         <input type="search" id="grBusca" placeholder="Buscar grupo…" autocomplete="off">
         <select id="grOrdem">
@@ -223,8 +233,8 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
           <option value="qtd-asc">Menores primeiro</option>
           <option value="nome">Nome (A–Z)</option>
         </select>
-        <button id="grMarcar">Marcar filtrados</button>
-        <button id="grDesmarcar">Desmarcar filtrados</button>
+        <button id="grMarcar">Desconsiderar filtrados</button>
+        <button id="grDesmarcar">Devolver filtrados</button>
       </div>
       <p class="contagem" id="grContagem"></p>
       <div class="grade" id="grLista"></div>
@@ -234,7 +244,7 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
     <section id="abaSelecoes" class="oculto">
       <div class="painel-cab">
         <h2>Seleções salvas</h2>
-        <span class="dica">Reabrir carrega as marcações. Duplicar abre uma cópia para editar.</span>
+        <span class="dica">Reabrir carrega as exclusões. Duplicar abre uma cópia para editar.</span>
       </div>
       <div class="salvas" id="selLista"></div>
     </section>
@@ -243,9 +253,9 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
   <footer class="rodape">
     <div class="rodape-in">
       <div class="placar">
-        <div class="c1"><b id="kpiContatos">0</b><span>contatos</span></div>
-        <div class="c2"><b id="kpiGrupos">0</b><span>grupos</span></div>
-        <div class="c3"><b id="kpiTotal">0</b><span>telefones únicos</span></div>
+        <div class="c1"><b id="kpiContatos">0</b><span>contatos fora</span></div>
+        <div class="c2"><b id="kpiGrupos">0</b><span>grupos fora</span></div>
+        <div class="c3"><b id="kpiTotal">0</b><span>telefones no envio</span></div>
       </div>
       <div class="acoes">
         <input type="text" id="selNome" placeholder="Nome da seleção" autocomplete="off" maxlength="120">
@@ -269,7 +279,7 @@ const nf = new Intl.NumberFormat('pt-BR');
 
 const st = {
   agenda: [], grupos: [], membros: new Map(),   // grupo_id -> [chave_fone]
-  selC: new Set(), selG: new Set(),             // marcados
+  excC: new Set(), excG: new Set(),             // MARCADOS = desconsiderados (fora do envio)
   agFiltrada: [], grFiltrada: [],
   selecaoAberta: null, salvas: []
 };
@@ -331,9 +341,9 @@ async function carregarBase() {
     a.push(m.chave_fone);
   }
 
-  // padrão: quem tem WhatsApp entra; quem não tem, fica de fora.
-  st.selC = new Set(agenda.filter(c => c.tem_whatsapp).map(c => c.id));
-  st.selG = new Set();
+  // Marcar = deixar de fora. Padrão: todo mundo entra, menos quem não tem WhatsApp.
+  st.excC = new Set(agenda.filter(c => !c.tem_whatsapp).map(c => c.id));
+  st.excG = new Set();
 
   const ddds = [...new Set(agenda.map(c => c.ddd).filter(d => d != null))].sort((a, b) => a - b);
   $('#agDdd').insertAdjacentHTML('beforeend',
@@ -373,7 +383,7 @@ function filtrarAgenda() {
   $('#agScroll').scrollTop = 0;
   $('#agContagem').innerHTML =
     `<b>${nf.format(st.agFiltrada.length)}</b> de ${nf.format(st.agenda.length)} contatos ·
-     <b>${nf.format(st.agFiltrada.filter(c => st.selC.has(c.id)).length)}</b> marcados no filtro`;
+     <b>${nf.format(st.agFiltrada.filter(c => st.excC.has(c.id)).length)}</b> fora no filtro`;
   desenharAgenda();
 }
 
@@ -391,9 +401,10 @@ function desenharAgenda() {
   const fim = Math.min(lista.length, Math.ceil((sc.scrollTop + sc.clientHeight) / ALT) + 6);
   let html = '';
   for (let i = ini; i < fim; i++) {
-    const c = lista[i], on = st.selC.has(c.id);
-    html += `<label class="linha${on ? ' on' : ''}" style="top:${i * ALT}px">
-      <input type="checkbox" data-id="${c.id}"${on ? ' checked' : ''}>
+    const c = lista[i], fora = st.excC.has(c.id);
+    html += `<label class="linha${fora ? ' fora' : ''}" style="top:${i * ALT}px" title="${
+        fora ? 'Fora do envio' : 'Entra no envio'}">
+      <input type="checkbox" data-id="${c.id}"${fora ? ' checked' : ''}>
       <span class="nm${c.nome ? '' : ' vazio'}">${c.nome ? esc(c.nome) : 'sem nome'}${
         c.tem_whatsapp ? '' : '<em class="selo">sem WhatsApp</em>'}</span>
       <span class="dd">${c.ddd ?? ''}</span>
@@ -407,8 +418,8 @@ $('#agScroll').addEventListener('scroll', () => requestAnimationFrame(desenharAg
 $('#agSpacer').addEventListener('change', e => {
   const cb = e.target.closest('input[type=checkbox]'); if (!cb) return;
   const id = Number(cb.dataset.id);
-  cb.checked ? st.selC.add(id) : st.selC.delete(id);
-  cb.closest('.linha').classList.toggle('on', cb.checked);
+  cb.checked ? st.excC.add(id) : st.excC.delete(id);
+  cb.closest('.linha').classList.toggle('fora', cb.checked);
   atualizarContagemAgenda(); placar();
 });
 ['#agBusca', '#agDdd', '#agWa'].forEach(s =>
@@ -417,14 +428,14 @@ $('#agSpacer').addEventListener('change', e => {
 function atualizarContagemAgenda() {
   $('#agContagem').innerHTML =
     `<b>${nf.format(st.agFiltrada.length)}</b> de ${nf.format(st.agenda.length)} contatos ·
-     <b>${nf.format(st.agFiltrada.filter(c => st.selC.has(c.id)).length)}</b> marcados no filtro`;
+     <b>${nf.format(st.agFiltrada.filter(c => st.excC.has(c.id)).length)}</b> fora no filtro`;
 }
 
 $('#agMarcar').addEventListener('click', () => {
-  st.agFiltrada.forEach(c => st.selC.add(c.id)); desenharAgenda(); atualizarContagemAgenda(); placar();
+  st.agFiltrada.forEach(c => st.excC.add(c.id)); desenharAgenda(); atualizarContagemAgenda(); placar();
 });
 $('#agDesmarcar').addEventListener('click', () => {
-  st.agFiltrada.forEach(c => st.selC.delete(c.id)); desenharAgenda(); atualizarContagemAgenda(); placar();
+  st.agFiltrada.forEach(c => st.excC.delete(c.id)); desenharAgenda(); atualizarContagemAgenda(); placar();
 });
 
 /* ---------------- grupos ---------------- */
@@ -439,11 +450,11 @@ function filtrarGrupos() {
   st.grFiltrada = l;
   $('#grContagem').innerHTML =
     `<b>${nf.format(l.length)}</b> de ${nf.format(st.grupos.length)} grupos ·
-     <b>${nf.format(l.filter(g => st.selG.has(g.id)).length)}</b> marcados no filtro`;
+     <b>${nf.format(l.filter(g => st.excG.has(g.id)).length)}</b> fora no filtro`;
   $('#grLista').innerHTML = l.map(g => {
-    const on = st.selG.has(g.id);
-    return `<label class="card${on ? ' on' : ''}">
-      <input type="checkbox" data-id="${g.id}"${on ? ' checked' : ''}>
+    const fora = st.excG.has(g.id);
+    return `<label class="card${fora ? ' fora' : ''}" title="${fora ? 'Fora do envio' : 'Entra no envio'}">
+      <input type="checkbox" data-id="${g.id}"${fora ? ' checked' : ''}>
       <span class="corpo">
         <span class="g-nome">${esc(g.nome)}</span>
         ${g.descricao ? `<span class="g-desc">${esc(g.descricao)}</span>` : ''}
@@ -459,32 +470,34 @@ function filtrarGrupos() {
 $('#grLista').addEventListener('change', e => {
   const cb = e.target.closest('input[type=checkbox]'); if (!cb) return;
   const id = Number(cb.dataset.id);
-  cb.checked ? st.selG.add(id) : st.selG.delete(id);
-  cb.closest('.card').classList.toggle('on', cb.checked);
+  cb.checked ? st.excG.add(id) : st.excG.delete(id);
+  cb.closest('.card').classList.toggle('fora', cb.checked);
   atualizarContagemGrupos(); placar();
 });
 ['#grBusca', '#grOrdem'].forEach(s => $(s).addEventListener('input', filtrarGrupos));
 $('#grMarcar').addEventListener('click', () => {
-  st.grFiltrada.forEach(g => st.selG.add(g.id)); filtrarGrupos(); placar();
+  st.grFiltrada.forEach(g => st.excG.add(g.id)); filtrarGrupos(); placar();
 });
 $('#grDesmarcar').addEventListener('click', () => {
-  st.grFiltrada.forEach(g => st.selG.delete(g.id)); filtrarGrupos(); placar();
+  st.grFiltrada.forEach(g => st.excG.delete(g.id)); filtrarGrupos(); placar();
 });
 function atualizarContagemGrupos() {
   $('#grContagem').innerHTML =
     `<b>${nf.format(st.grFiltrada.length)}</b> de ${nf.format(st.grupos.length)} grupos ·
-     <b>${nf.format(st.grFiltrada.filter(g => st.selG.has(g.id)).length)}</b> marcados no filtro`;
+     <b>${nf.format(st.grFiltrada.filter(g => st.excG.has(g.id)).length)}</b> fora no filtro`;
 }
 
 /* ---------------- placar ao vivo ---------------- */
-// Mesma regra da lista final: contato desmarcado na agenda sai mesmo vindo por grupo.
+// Mesma regra da lista final: contato desconsiderado na agenda sai mesmo vindo por grupo.
 function totalUnico() {
   const fora = new Set(), dentro = new Set();
   for (const c of st.agenda)
-    (st.selC.has(c.id) ? dentro : fora).add(c.chave_fone);
-  for (const gid of st.selG)
-    for (const k of (st.membros.get(gid) || []))
-      if (!fora.has(k)) dentro.add(k);
+    (st.excC.has(c.id) ? fora : dentro).add(c.chave_fone);
+  for (const g of st.grupos) {
+    if (st.excG.has(g.id)) continue;               // grupo desconsiderado não entra
+    for (const k of (st.membros.get(g.id) || []))
+      if (!fora.has(k)) dentro.add(k);             // exclusão da agenda vence
+  }
   return dentro.size;
 }
 
@@ -494,8 +507,8 @@ function placar() {
   placarPend = true;
   requestAnimationFrame(() => {
     placarPend = false;
-    $('#kpiContatos').textContent = nf.format(st.selC.size);
-    $('#kpiGrupos').textContent = nf.format(st.selG.size);
+    $('#kpiContatos').textContent = nf.format(st.excC.size);
+    $('#kpiGrupos').textContent = nf.format(st.excG.size);
     $('#kpiTotal').textContent = nf.format(totalUnico());
   });
 }
@@ -513,10 +526,10 @@ function montarCsv(selecaoId, selecaoNome) {
   const linhas = ['selecao_id;selecao_nome;tipo;ref_id;nome;qtd_contatos;status'];
   for (const c of st.agenda)
     linhas.push([selecaoId, selecaoNome, 'contato', c.id, c.nome || '', 1,
-                 st.selC.has(c.id) ? 'incluido' : 'desconsiderado'].map(campoCsv).join(';'));
+                 st.excC.has(c.id) ? 'desconsiderado' : 'incluido'].map(campoCsv).join(';'));
   for (const g of st.grupos)
     linhas.push([selecaoId, selecaoNome, 'grupo', g.id, g.nome, g.qtd_contatos,
-                 st.selG.has(g.id) ? 'incluido' : 'desconsiderado'].map(campoCsv).join(';'));
+                 st.excG.has(g.id) ? 'desconsiderado' : 'incluido'].map(campoCsv).join(';'));
   return '﻿' + linhas.join('\r\n') + '\r\n';
 }
 
@@ -542,9 +555,9 @@ $('#btSalvar').addEventListener('click', async () => {
 
     const itens = [
       ...st.agenda.map(c => ({ selecao_id: sel.id, tipo: 'contato', ref_id: c.id,
-        status: st.selC.has(c.id) ? 'incluido' : 'desconsiderado' })),
+        status: st.excC.has(c.id) ? 'desconsiderado' : 'incluido' })),
       ...st.grupos.map(g => ({ selecao_id: sel.id, tipo: 'grupo', ref_id: g.id,
-        status: st.selG.has(g.id) ? 'incluido' : 'desconsiderado' }))
+        status: st.excG.has(g.id) ? 'desconsiderado' : 'incluido' }))
     ];
     for (let i = 0; i < itens.length; i += 1000) {
       const { error } = await sb.from('selecao_itens').insert(itens.slice(i, i + 1000));
@@ -617,14 +630,14 @@ async function aplicar(selecaoId, marcarUi) {
   const passo = 1000, itens = [];
   for (let de = 0; ; de += passo) {
     const { data, error } = await sb.from('selecao_itens')
-      .select('tipo,ref_id,status').eq('selecao_id', selecaoId).eq('status', 'incluido')
+      .select('tipo,ref_id,status').eq('selecao_id', selecaoId).eq('status', 'desconsiderado')
       .order('id', { ascending: true }).range(de, de + passo - 1);
     if (error) throw error;
     itens.push(...data);
     if (data.length < passo) break;
   }
-  st.selC = new Set(itens.filter(i => i.tipo === 'contato').map(i => i.ref_id));
-  st.selG = new Set(itens.filter(i => i.tipo === 'grupo').map(i => i.ref_id));
+  st.excC = new Set(itens.filter(i => i.tipo === 'contato').map(i => i.ref_id));
+  st.excG = new Set(itens.filter(i => i.tipo === 'grupo').map(i => i.ref_id));
   if (marcarUi) { filtrarAgenda(); filtrarGrupos(); }
   placar();
 }
