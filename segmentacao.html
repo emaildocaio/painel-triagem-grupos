@@ -917,8 +917,9 @@ $('#btGerar').addEventListener('click', async () => {
       ['Na lista de bloqueio permanente', r.fora_bloqueio, 'sai'],
       ['Não são celular brasileiro', r.fora_nao_celular, 'sai'],
       [`Celular de DDD fora de ${ddds.join(', ')}`, r.fora_ddd, 'sai'],
+      ['Nome na lista de bloqueio', r.fora_nome, 'sai'],
       ['Vão receber', r.total_final, 'fim']
-    ].map(([t, n, cls]) =>
+    ].filter(([, n], i, a) => n > 0 || i === 0 || i === a.length - 1).map(([t, n, cls]) =>
       `<div class="${cls}"><span>${cls === 'sai' ? '− ' : ''}${esc(t)}</span><b>${nf.format(n)}</b></div>`
     ).join('') +
       `<div><span>Desses: ${nf.format(r.vindos_da_agenda)} pela agenda · ${
@@ -927,6 +928,9 @@ $('#btGerar').addEventListener('click', async () => {
       `<tr><td>${l.nome ? esc(l.nome) : '<i>sem nome</i>'}</td><td>${l.ddd}</td>
            <td>${esc(l.numero)}</td><td>${esc(l.fonte)}</td></tr>`).join('');
     $('#liArquivo').textContent = `${nf.format(st.lista.length)} linhas · colunas nome; ddd; numero`;
+    // rede de segurança: se o banco cortasse a lista, os dois números não bateriam
+    if (st.lista.length !== r.total_final)
+      throw new Error(`a lista veio com ${st.lista.length} linhas mas o resumo diz ${r.total_final}. Não baixe o arquivo; me avise.`);
     $('#liVazio').classList.add('oculto');
     $('#liResultado').classList.remove('oculto');
     aviso(`Lista pronta: ${nf.format(r.total_final)} telefones.`);
@@ -951,8 +955,9 @@ function montarRelatorio() {
     ['Na lista de bloqueio permanente', r.fora_bloqueio, 'sai'],
     ['Não são celular brasileiro', r.fora_nao_celular, 'sai'],
     ['Celular de DDD fora de ' + ddds.join(', '), r.fora_ddd, 'sai'],
+    ['Nome na lista de bloqueio', r.fora_nome, 'sai'],
     ['Vão receber', r.total_final, 'fim']
-  ].map(([t, n, c]) => `<tr class="${c}"><td>${c === 'sai' ? '&minus; ' : ''}${esc(t)}</td><td>${nf.format(n)}</td></tr>`).join('');
+  ].filter(([, n], i, a) => n > 0 || i === 0 || i === a.length - 1).map(([t, n, c]) => `<tr class="${c}"><td>${c === 'sai' ? '&minus; ' : ''}${esc(t)}</td><td>${nf.format(n)}</td></tr>`).join('');
 
   const previa = st.lista.slice(0, 30).map(l =>
     `<tr><td>${l.nome ? esc(l.nome) : '<i>sem nome</i>'}</td><td>${l.ddd}</td><td>${esc(l.numero)}</td><td>${esc(l.fonte)}</td></tr>`).join('');
