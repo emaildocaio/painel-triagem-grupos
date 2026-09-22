@@ -370,7 +370,7 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
           <span class="dica" id="liArquivo"></span>
         </div>
         <p class="contagem" style="margin-top:16px">Prévia das 20 primeiras linhas:</p>
-        <table class="previa"><thead><tr><th>Nome</th><th>DDD</th><th>Número</th><th>Veio de</th></tr></thead>
+        <table class="previa"><thead><tr><th>Nome</th><th>Saudação</th><th>DDD</th><th>Número</th><th>Veio de</th></tr></thead>
           <tbody id="liPrevia"></tbody></table>
       </div>
       <p class="vazio-msg" id="liVazio">Escolha uma seleção e clique em <b>Gerar lista</b>.</p>
@@ -503,8 +503,30 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
           <li>fica só quem tem <b>DDD do Rio</b> — 21, 22 e 24 vêm marcados; dá para mudar.</li>
         </ol>
         <p>O funil na tela mostra quantos saíram em cada etapa, para você conferir que a conta
-           fecha. O botão <b>Baixar CSV do disparo</b> gera o arquivo com <b>nome; ddd; numero</b>,
-           que é o que vai para a ferramenta de envio.</p>
+           fecha. O botão <b>Baixar CSV do disparo</b> gera o arquivo com
+           <b>nome; ddd; numero; primeiro_nome; tem_nome</b>, que é o que vai para a ferramenta
+           de envio.</p>
+
+        <h3>Chamar pelo nome — e quando não dá</h3>
+        <p>O WhatsApp só exporta o nome de quem alguém salvou na agenda. Boa parte dos membros
+           de grupo vem com o próprio telefone no lugar do nome, e não existe onde buscar esse
+           nome: não está na agenda, nem na escola, nem em outro grupo.</p>
+        <p>Por isso o arquivo tem duas colunas a mais:</p>
+        <ul>
+          <li><b>primeiro_nome</b> — a saudação pronta, já limpa: só o primeiro nome, sem
+              sobrenome, sem título (Dr., Sra.), sem o parentesco e sem a série da escola.
+              Vem vazio quando não dá para confiar.</li>
+          <li><b>tem_nome</b> — <b>sim</b> ou <b>nao</b>, para a ferramenta de envio escolher
+              a mensagem.</li>
+        </ul>
+        <p>Monte <b>duas versões</b> da mensagem: uma que começa com o nome e outra com saudação
+           genérica. Se usar a variável de nome em todo mundo, quem não tem nome recebe o próprio
+           número na saudação.</p>
+        <div class="exemplo">
+          <p>Um caso que o painel recusa de propósito: um contato salvo como <b>"Mãe do Pedro"</b>.
+             O Pedro é o filho — chamar a mãe de Pedro seria pior que não chamar de nada.</p>
+          <p class="conta">Nesse caso <b>tem_nome</b> vem <b>nao</b>.</p>
+        </div>
         <div class="exemplo">
           <p>Se o mesmo número estiver na agenda e em três grupos, ele sai uma vez só — e com
              o nome que está na agenda, não com o nome que aparece no grupo.</p>
@@ -946,11 +968,15 @@ $('#btGerar').addEventListener('click', async () => {
       `<div class="${cls}"><span>${cls === 'sai' ? '− ' : ''}${esc(t)}</span><b>${nf.format(n)}</b></div>`
     ).join('') +
       `<div><span>Desses: ${nf.format(r.vindos_da_agenda)} pela agenda · ${
-        nf.format(r.vindos_da_escola)} pela escola · ${nf.format(r.vindos_de_grupo)} por grupo</span><b></b></div>`;
+        nf.format(r.vindos_da_escola)} pela escola · ${nf.format(r.vindos_de_grupo)} por grupo</span><b></b></div>` +
+      `<div><span><b>${nf.format(r.com_saudacao)}</b> dá para chamar pelo nome · <b>${
+        nf.format(r.sem_saudacao)}</b> só têm o telefone, use saudação genérica</span><b></b></div>`;
     $('#liPrevia').innerHTML = st.lista.slice(0, 20).map(l =>
-      `<tr><td>${l.nome ? esc(l.nome) : '<i>sem nome</i>'}</td><td>${l.ddd}</td>
-           <td>${esc(l.numero)}</td><td>${esc(l.fonte)}</td></tr>`).join('');
-    $('#liArquivo').textContent = `${nf.format(st.lista.length)} linhas · colunas nome; ddd; numero`;
+      `<tr><td>${l.nome ? esc(l.nome) : '<i>só o telefone</i>'}</td>
+           <td>${l.primeiro_nome ? esc(l.primeiro_nome) : '<i>—</i>'}</td>
+           <td>${l.ddd}</td><td>${esc(l.numero)}</td><td>${esc(l.fonte)}</td></tr>`).join('');
+    $('#liArquivo').textContent =
+      `${nf.format(st.lista.length)} linhas · nome; ddd; numero; primeiro_nome; tem_nome`;
     $('#liVazio').classList.add('oculto');
     $('#liResultado').classList.remove('oculto');
     aviso(`Lista pronta: ${nf.format(r.total_final)} telefones.`);
@@ -964,8 +990,10 @@ function montarRelatorio() {
   const r = st.resumo, ddds = dddsEscolhidos();
   const nomeSel = st.listaDe?.nome ?? '(seleção)';
   const quando = new Date().toLocaleString('pt-BR');
-  const linhas = ['nome;ddd;numero'];
-  for (const l of st.lista) linhas.push([l.nome || '', l.ddd, l.numero].map(campoCsv).join(';'));
+  const linhas = ['nome;ddd;numero;primeiro_nome;tem_nome'];
+  for (const l of st.lista)
+    linhas.push([l.nome || '', l.ddd, l.numero, l.primeiro_nome || '',
+                 l.tem_nome ? 'sim' : 'nao'].map(campoCsv).join(';'));
   const csv = linhas.join('\r\n') + '\r\n';
 
   const funil = [
@@ -980,7 +1008,9 @@ function montarRelatorio() {
   ].filter(([, n], i, a) => n > 0 || i === 0 || i === a.length - 1).map(([t, n, c]) => `<tr class="${c}"><td>${c === 'sai' ? '&minus; ' : ''}${esc(t)}</td><td>${nf.format(n)}</td></tr>`).join('');
 
   const previa = st.lista.slice(0, 30).map(l =>
-    `<tr><td>${l.nome ? esc(l.nome) : '<i>sem nome</i>'}</td><td>${l.ddd}</td><td>${esc(l.numero)}</td><td>${esc(l.fonte)}</td></tr>`).join('');
+    `<tr><td>${l.nome ? esc(l.nome) : '<i>só o telefone</i>'}</td><td>${
+      l.primeiro_nome ? esc(l.primeiro_nome) : '<i>—</i>'}</td><td>${l.ddd}</td><td>${
+      esc(l.numero)}</td><td>${esc(l.fonte)}</td></tr>`).join('');
 
   return `<!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8">
@@ -1011,8 +1041,8 @@ td:last-child{text-align:right;font-variant-numeric:tabular-nums;font-weight:600
 tr.sai td:last-child{color:var(--terracota)}
 tr.fim td{background:var(--amarelo-claro);font-weight:700;font-size:19px}
 table.previa td:last-child{text-align:left;font-weight:400;color:var(--cafe-claro)}
-table.previa td:nth-child(2),table.previa td:nth-child(3),
-table.previa th:nth-child(2),table.previa th:nth-child(3){text-align:right;font-variant-numeric:tabular-nums}
+table.previa td:nth-child(3),table.previa td:nth-child(4),
+table.previa th:nth-child(3),table.previa th:nth-child(4){text-align:right;font-variant-numeric:tabular-nums}
 ul,ol{padding-left:20px} li{margin:5px 0}
 .ok li::marker{content:"✓  ";color:var(--terracota);font-weight:700}
 button{font:inherit;font-weight:700;background:var(--laranja);color:#fff;border:0;
@@ -1055,10 +1085,22 @@ dentro telefone a telefone, juntou tudo e aplicou as regras abaixo, nesta ordem.
     e só por último o nome que aparece no grupo.</li>
 </ul>
 
+<h2>Chamar pelo nome</h2>
+<p>O export do WhatsApp só traz o nome de quem alguém salvou na agenda. Por isso a lista
+se divide em dois grupos, e a coluna <b>tem_nome</b> do arquivo diz qual é qual:</p>
+<table><tbody>
+<tr><td>Dá para chamar pelo nome (coluna <b>primeiro_nome</b> preenchida)</td><td>${nf.format(r.com_saudacao)}</td></tr>
+<tr><td>Só temos o telefone — use saudação genérica</td><td>${nf.format(r.sem_saudacao)}</td></tr>
+</tbody></table>
+<p>Monte duas versões da mensagem. Se usar a variável de nome em todo mundo,
+${nf.format(r.sem_saudacao)} pessoas receberiam uma saudação com o próprio número no lugar
+do nome. O <b>primeiro_nome</b> já vem limpo: sem sobrenome, sem parentesco e sem a série
+da escola — e vazio quando não dava para confiar.</p>
+
 <h2>Foto da base final</h2>
 <p>As 30 primeiras linhas, para conferência. O arquivo completo tem
 <b>${nf.format(st.lista.length)} linhas</b> e está embutido nesta página.</p>
-<table class="previa"><thead><tr><th>Nome</th><th>DDD</th><th>Número</th><th>Veio de</th></tr></thead>
+<table class="previa"><thead><tr><th>Nome</th><th>Saudação</th><th>DDD</th><th>Número</th><th>Veio de</th></tr></thead>
 <tbody>${previa}</tbody></table>
 <p><button id="bt">Baixar o CSV completo (${nf.format(st.lista.length)} linhas)</button></p>
 
@@ -1068,7 +1110,8 @@ aberta e não repasse para fora. Quem pedir para não receber mais deve entrar n
 bloqueio permanente, para a decisão valer nas próximas campanhas.</div>
 
 <p class="rodape">Painel de Segmentação · Renato Pellizzari · PSB 40004 · deputado estadual RJ<br>
-Colunas do arquivo: <b>nome; ddd; numero</b> — separador ponto e vírgula, UTF-8 com BOM, abre direto no Excel.</p>
+Colunas do arquivo: <b>nome; ddd; numero; primeiro_nome; tem_nome</b> — separador ponto e vírgula,
+UTF-8 com BOM, abre direto no Excel.</p>
 
 </div>
 <script type="text/plain" id="csv">${csv.replace(/<\//g, '<\\/')}<\/script>
@@ -1098,8 +1141,10 @@ $('#btRelatorio').addEventListener('click', () => {
 
 $('#btBaixarLista').addEventListener('click', () => {
   if (!st.lista) return;
-  const linhas = ['nome;ddd;numero'];
-  for (const l of st.lista) linhas.push([l.nome || '', l.ddd, l.numero].map(campoCsv).join(';'));
+  const linhas = ['nome;ddd;numero;primeiro_nome;tem_nome'];
+  for (const l of st.lista)
+    linhas.push([l.nome || '', l.ddd, l.numero, l.primeiro_nome || '',
+                 l.tem_nome ? 'sim' : 'nao'].map(campoCsv).join(';'));
   baixar(`disparo-${arquivoSeguro(st.listaDe?.nome)}-${dddsEscolhidos().join('-')}.csv`,
          '\ufeff' + linhas.join('\r\n') + '\r\n');
   aviso(`CSV do disparo baixado com ${nf.format(st.lista.length)} telefones.`);
