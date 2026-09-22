@@ -893,6 +893,25 @@ $('#liOutros').addEventListener('click', () => {
     `<label class="extra"><input type="checkbox" value="${d}" checked> ${d}</label>`).join(''));
 });
 
+/* A API do Supabase corta a resposta (1.000 linhas por padrão), então a lista vem
+   em pedaços. O resumo diz o tamanho certo, e é ele que manda parar. A ordenação vai
+   explícita na chamada para as páginas não se embaralharem entre um pedido e outro. */
+async function listaPaginada(args, total) {
+  const saida = [];
+  let voltas = 0;
+  while (saida.length < total) {
+    const { data, error } = await sb.rpc('fn_lista_envio', args)
+      .order('nome', { nullsFirst: false }).order('ddd').order('numero')
+      .range(saida.length, saida.length + 999);
+    if (error) throw error;
+    if (!data.length) break;                     // não avançou: para em vez de repetir para sempre
+    saida.push(...data);
+    if (++voltas > 200) break;                   // trava de segurança
+    if (saida.length < total) aviso(`Montando a lista… ${nf.format(saida.length)}/${nf.format(total)}`);
+  }
+  return saida;
+}
+
 $('#btGerar').addEventListener('click', async () => {
   const selecaoId = $('#liSelecao').value;
   const ddds = dddsEscolhidos();
@@ -900,15 +919,19 @@ $('#btGerar').addEventListener('click', async () => {
   if (!ddds.length) { aviso('Marque pelo menos um DDD.'); return; }
   const bt = $('#btGerar'); bt.disabled = true; aviso('Montando a lista…');
   try {
-    const [r1, r2] = await Promise.all([
-      sb.rpc('fn_resumo_envio', { p_selecao_id: selecaoId, p_ddds: ddds }),
-      sb.rpc('fn_lista_envio',  { p_selecao_id: selecaoId, p_ddds: ddds })
-    ]);
+    const args = { p_selecao_id: selecaoId, p_ddds: ddds };
+    const r1 = await sb.rpc('fn_resumo_envio', args);
     if (r1.error) throw r1.error;
-    if (r2.error) throw r2.error;
     const r = Array.isArray(r1.data) ? r1.data[0] : r1.data;
     st.resumo = r;
-    st.lista = r2.data;
+    st.lista = await listaPaginada(args, r.total_final);
+    // rede de segurança: se a API cortasse a lista, os dois números não bateriam
+    if (st.lista.length !== r.total_final)
+      throw new Error(`a lista veio com ${nf.format(st.lista.length)} linhas mas o resumo diz ${
+        nf.format(r.total_final)}. Não baixe o arquivo; me avise.`);
+    // a paginação vem ordenada do banco; reordena aqui para o caso de um pedaço chegar fora de ordem
+    st.lista.sort((a, b) => (a.nome ?? '\uffff').localeCompare(b.nome ?? '\uffff', 'pt-BR')
+                         || a.ddd - b.ddd || a.numero.localeCompare(b.numero));
     st.listaDe = st.salvas.find(s => s.id === selecaoId);
     $('#liFunil').innerHTML = [
       ['Telefones que a seleção trouxe', r.telefones_distintos, ''],
@@ -928,9 +951,6 @@ $('#btGerar').addEventListener('click', async () => {
       `<tr><td>${l.nome ? esc(l.nome) : '<i>sem nome</i>'}</td><td>${l.ddd}</td>
            <td>${esc(l.numero)}</td><td>${esc(l.fonte)}</td></tr>`).join('');
     $('#liArquivo').textContent = `${nf.format(st.lista.length)} linhas · colunas nome; ddd; numero`;
-    // rede de segurança: se o banco cortasse a lista, os dois números não bateriam
-    if (st.lista.length !== r.total_final)
-      throw new Error(`a lista veio com ${st.lista.length} linhas mas o resumo diz ${r.total_final}. Não baixe o arquivo; me avise.`);
     $('#liVazio').classList.add('oculto');
     $('#liResultado').classList.remove('oculto');
     aviso(`Lista pronta: ${nf.format(r.total_final)} telefones.`);
