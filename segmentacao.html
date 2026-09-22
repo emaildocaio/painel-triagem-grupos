@@ -114,6 +114,24 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
 .linha.fora .es-serie{opacity:.45;}
 .selo.agenda{background:var(--amarelo-claro);border-color:var(--amarelo);color:var(--cafe);}
 
+/* lista final */
+.ddds{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.ddds label{display:inline-flex;gap:6px;align-items:center;background:var(--papel);
+  border:1.5px solid var(--linha);border-radius:999px;padding:4px 12px;cursor:pointer;font-weight:600;}
+.ddds label:has(input:checked){border-color:var(--terracota);background:var(--rosa);color:var(--terracota);}
+.ddds input{accent-color:var(--terracota);width:16px;height:16px;margin:0;}
+.funil{display:grid;gap:2px;background:var(--linha);border:1px solid var(--linha);
+  border-radius:12px;overflow:hidden;margin:14px 0;}
+.funil div{display:flex;justify-content:space-between;gap:14px;background:var(--papel);padding:9px 14px;}
+.funil div.sai span:last-child{color:var(--terracota);}
+.funil div.fim{background:var(--amarelo-claro);font-weight:700;}
+.funil b{font-variant-numeric:tabular-nums;}
+.previa{width:100%;border-collapse:collapse;font-size:15px;}
+.previa th{text-align:left;font-size:12.5px;text-transform:uppercase;letter-spacing:.04em;
+  color:var(--cafe-claro);padding:0 10px 6px;}
+.previa td{padding:7px 10px;border-top:1px solid var(--papel-2);}
+.previa td:nth-child(2),.previa td:nth-child(3){font-variant-numeric:tabular-nums;}
+
 /* grupos */
 .grade{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));}
 .card{background:var(--papel);border:1.5px solid var(--linha);border-radius:14px;
@@ -230,6 +248,7 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
     <button role="tab" data-aba="agenda"   aria-selected="true">Agenda</button>
     <button role="tab" data-aba="grupos"   aria-selected="false">Grupos</button>
     <button role="tab" data-aba="escola"   aria-selected="false">Escola</button>
+    <button role="tab" data-aba="lista"    aria-selected="false">Lista final</button>
     <button role="tab" data-aba="selecoes" aria-selected="false">Seleções salvas</button>
     <button role="tab" data-aba="ajuda"    aria-selected="false">Como funciona</button>
   </nav>
@@ -320,6 +339,40 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
       <p class="contagem" style="margin-top:10px">Origem: extração de julho/2026 do cadastro do colégio,
         já reduzida aos números com WhatsApp. Não é a base completa dos livros de matrícula
         (801 pessoas / 692 domicílios), que continua fora do banco.</p>
+    </section>
+
+    <!-- LISTA FINAL -->
+    <section id="abaLista" class="oculto">
+      <div class="painel-cab">
+        <h2>Lista final de envio</h2>
+      </div>
+      <p class="regra">Aqui a seleção vira a lista de disparo: os grupos que ficaram dentro são
+        abertos telefone a telefone, juntados com a agenda e com a escola, e então o painel aplica
+        as regras — quem foi marcado fora sai mesmo vindo por grupo, quem está na lista de bloqueio
+        sai sempre, telefone repetido conta uma vez só, e fica só celular brasileiro dos DDDs
+        escolhidos.</p>
+      <div class="ferramentas">
+        <select id="liSelecao"></select>
+        <button class="primario" id="btGerar">Gerar lista</button>
+      </div>
+      <p class="contagem" style="margin:12px 0 6px">DDDs que entram:</p>
+      <div class="ddds" id="liDdds">
+        <label><input type="checkbox" value="21" checked> 21 — Rio e Baixada</label>
+        <label><input type="checkbox" value="22" checked> 22 — Lagos e Norte</label>
+        <label><input type="checkbox" value="24" checked> 24 — Sul e Serrana</label>
+        <button id="liOutros" type="button">Outros DDDs…</button>
+      </div>
+      <div id="liResultado" class="oculto">
+        <div class="funil" id="liFunil"></div>
+        <div class="ferramentas">
+          <button class="primario" id="btBaixarLista">Baixar CSV do disparo</button>
+          <span class="dica" id="liArquivo"></span>
+        </div>
+        <p class="contagem" style="margin-top:16px">Prévia das 20 primeiras linhas:</p>
+        <table class="previa"><thead><tr><th>Nome</th><th>DDD</th><th>Número</th><th>Veio de</th></tr></thead>
+          <tbody id="liPrevia"></tbody></table>
+      </div>
+      <p class="vazio-msg" id="liVazio">Escolha uma seleção e clique em <b>Gerar lista</b>.</p>
     </section>
 
     <!-- COMO FUNCIONA -->
@@ -435,11 +488,26 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
           <li><b>CSV</b> — baixa de novo o arquivo daquela seleção.</li>
         </ul>
 
-        <h3>E depois?</h3>
-        <p>O CSV da seleção vira a lista de envio: o sistema abre cada grupo que ficou dentro,
-           junta com os contatos da agenda que ficaram dentro, aplica a regra da exclusão,
-           remove telefone repetido e descarta o que não é celular brasileiro. O que sai é uma
-           lista de <b>nome, DDD e número</b>, pronta para o disparo.</p>
+        <h3>A aba Lista final</h3>
+        <p>É onde a seleção vira a lista de disparo. Escolha a seleção salva, confira os DDDs
+           e clique em <b>Gerar lista</b>. O painel abre cada grupo que ficou dentro telefone a
+           telefone, junta com a agenda e com a escola, e aplica as regras nesta ordem:</p>
+        <ol class="passos">
+          <li>telefone repetido conta <b>uma vez só</b>;</li>
+          <li>quem foi marcado fora na Agenda ou na Escola <b>sai</b>, mesmo vindo por um grupo
+              que ficou dentro;</li>
+          <li>quem está na <b>lista de bloqueio permanente</b> sai sempre — é onde ficam as
+              pessoas que pediram para nunca receber;</li>
+          <li>fica só <b>celular brasileiro</b> (fixo e número estrangeiro caem fora);</li>
+          <li>fica só quem tem <b>DDD do Rio</b> — 21, 22 e 24 vêm marcados; dá para mudar.</li>
+        </ol>
+        <p>O funil na tela mostra quantos saíram em cada etapa, para você conferir que a conta
+           fecha. O botão <b>Baixar CSV do disparo</b> gera o arquivo com <b>nome; ddd; numero</b>,
+           que é o que vai para a ferramenta de envio.</p>
+        <div class="exemplo">
+          <p>Se o mesmo número estiver na agenda e em três grupos, ele sai uma vez só — e com
+             o nome que está na agenda, não com o nome que aparece no grupo.</p>
+        </div>
 
         <h3>De onde vem cada base</h3>
         <ul>
@@ -462,6 +530,9 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
           <li>Cada seleção fica registrada com o e-mail de quem salvou.</li>
           <li>Na dúvida sobre incluir alguém, marque para fora: dá para devolver depois, mas
               mensagem enviada não volta.</li>
+          <li>Quem pedir para nunca mais receber deve entrar na lista de bloqueio permanente,
+              não só ser marcado numa seleção — assim a decisão vale para todas as campanhas
+              seguintes, sem depender de ninguém lembrar.</li>
         </ul>
 
       </div>
@@ -509,7 +580,7 @@ const st = {
   agenda: [], grupos: [], escola: [], membros: new Map(),   // grupo_id -> [chave_fone]
   excC: new Set(), excG: new Set(), excE: new Set(),        // MARCADOS = desconsiderados (fora do envio)
   agFiltrada: [], grFiltrada: [], esFiltrada: [],
-  selecaoAberta: null, salvas: []
+  selecaoAberta: null, salvas: [], lista: null, listaDe: null
 };
 
 /* ---------------- login ---------------- */
@@ -606,10 +677,11 @@ function mostrarAba(nome) {
   document.querySelectorAll('.abas button').forEach(b =>
     b.setAttribute('aria-selected', String(b.dataset.aba === nome)));
   for (const [k, el] of [['agenda', '#abaAgenda'], ['grupos', '#abaGrupos'],
-                         ['escola', '#abaEscola'], ['selecoes', '#abaSelecoes'],
-                         ['ajuda', '#abaAjuda']])
+                         ['escola', '#abaEscola'], ['lista', '#abaLista'],
+                         ['selecoes', '#abaSelecoes'], ['ajuda', '#abaAjuda']])
     $(el).classList.toggle('oculto', k !== nome);
   if (nome === 'agenda') desenharAgenda();
+  if (nome === 'lista') encherSelecoesDaLista();
 }
 
 /* ---------------- agenda ---------------- */
@@ -795,6 +867,80 @@ $('#esDesmarcar').addEventListener('click', () => {
   st.esFiltrada.forEach(p => st.excE.delete(p.id)); desenharEscola(); atualizarContagemEscola(); placar();
 });
 
+/* ---------------- lista final ---------------- */
+function encherSelecoesDaLista() {
+  const sel = $('#liSelecao'), atual = sel.value;
+  sel.innerHTML = st.salvas.length
+    ? st.salvas.map(s => `<option value="${s.id}">${esc(s.nome)} — ${
+        new Date(s.criado_em).toLocaleDateString('pt-BR')}</option>`).join('')
+    : '<option value="">Nenhuma seleção salva ainda</option>';
+  if (atual && st.salvas.some(s => s.id === atual)) sel.value = atual;
+  else if (st.selecaoAberta) sel.value = st.selecaoAberta;
+}
+
+function dddsEscolhidos() {
+  return [...document.querySelectorAll('#liDdds input:checked')].map(i => Number(i.value));
+}
+
+$('#liOutros').addEventListener('click', () => {
+  const txt = prompt('DDDs separados por vírgula (ex: 11,31,61):', '');
+  if (txt === null) return;
+  const novos = [...new Set(txt.split(/[^0-9]+/).filter(Boolean).map(Number))]
+    .filter(d => d >= 11 && d <= 99 && ![21, 22, 24].includes(d));
+  document.querySelectorAll('#liDdds label.extra').forEach(l => l.remove());
+  $('#liOutros').insertAdjacentHTML('beforebegin', novos.map(d =>
+    `<label class="extra"><input type="checkbox" value="${d}" checked> ${d}</label>`).join(''));
+});
+
+$('#btGerar').addEventListener('click', async () => {
+  const selecaoId = $('#liSelecao').value;
+  const ddds = dddsEscolhidos();
+  if (!selecaoId) { aviso('Salve uma seleção antes de gerar a lista.'); return; }
+  if (!ddds.length) { aviso('Marque pelo menos um DDD.'); return; }
+  const bt = $('#btGerar'); bt.disabled = true; aviso('Montando a lista…');
+  try {
+    const [r1, r2] = await Promise.all([
+      sb.rpc('fn_resumo_envio', { p_selecao_id: selecaoId, p_ddds: ddds }),
+      sb.rpc('fn_lista_envio',  { p_selecao_id: selecaoId, p_ddds: ddds })
+    ]);
+    if (r1.error) throw r1.error;
+    if (r2.error) throw r2.error;
+    const r = Array.isArray(r1.data) ? r1.data[0] : r1.data;
+    st.lista = r2.data;
+    st.listaDe = st.salvas.find(s => s.id === selecaoId);
+    $('#liFunil').innerHTML = [
+      ['Telefones que a seleção trouxe', r.telefones_distintos, ''],
+      ['Repetições juntadas (mesmo telefone em vários lugares)', r.repeticoes_juntadas, 'sai'],
+      ['Marcados fora na Agenda ou na Escola', r.fora_regra_exclusao, 'sai'],
+      ['Na lista de bloqueio permanente', r.fora_bloqueio, 'sai'],
+      ['Não são celular brasileiro', r.fora_nao_celular, 'sai'],
+      [`Celular de DDD fora de ${ddds.join(', ')}`, r.fora_ddd, 'sai'],
+      ['Vão receber', r.total_final, 'fim']
+    ].map(([t, n, cls]) =>
+      `<div class="${cls}"><span>${cls === 'sai' ? '− ' : ''}${esc(t)}</span><b>${nf.format(n)}</b></div>`
+    ).join('') +
+      `<div><span>Desses: ${nf.format(r.vindos_da_agenda)} pela agenda · ${
+        nf.format(r.vindos_da_escola)} pela escola · ${nf.format(r.vindos_de_grupo)} por grupo</span><b></b></div>`;
+    $('#liPrevia').innerHTML = st.lista.slice(0, 20).map(l =>
+      `<tr><td>${l.nome ? esc(l.nome) : '<i>sem nome</i>'}</td><td>${l.ddd}</td>
+           <td>${esc(l.numero)}</td><td>${esc(l.fonte)}</td></tr>`).join('');
+    $('#liArquivo').textContent = `${nf.format(st.lista.length)} linhas · colunas nome; ddd; numero`;
+    $('#liVazio').classList.add('oculto');
+    $('#liResultado').classList.remove('oculto');
+    aviso(`Lista pronta: ${nf.format(r.total_final)} telefones.`);
+  } catch (err) { aviso('Erro ao gerar: ' + err.message); }
+  finally { bt.disabled = false; }
+});
+
+$('#btBaixarLista').addEventListener('click', () => {
+  if (!st.lista) return;
+  const linhas = ['nome;ddd;numero'];
+  for (const l of st.lista) linhas.push([l.nome || '', l.ddd, l.numero].map(campoCsv).join(';'));
+  baixar(`disparo-${arquivoSeguro(st.listaDe?.nome)}-${dddsEscolhidos().join('-')}.csv`,
+         '\ufeff' + linhas.join('\r\n') + '\r\n');
+  aviso(`CSV do disparo baixado com ${nf.format(st.lista.length)} telefones.`);
+});
+
 /* ---------------- placar ao vivo ---------------- */
 // Mesma regra da lista final: telefone marcado num nível de contato (agenda ou escola)
 // sai do envio mesmo que venha por um grupo que ficou dentro. A exclusão sempre vence.
@@ -909,6 +1055,7 @@ async function carregarSalvas() {
     .select('id,nome,criado_por,criado_em,observacao').order('criado_em', { ascending: false }).limit(60);
   if (error) { $('#selLista').innerHTML = '<p class="vazio-msg">Erro: ' + esc(error.message) + '</p>'; return; }
   st.salvas = data;
+  if (!$('#abaLista').classList.contains('oculto')) encherSelecoesDaLista();
   $('#selLista').innerHTML = data.length ? data.map(s => `
     <div class="salva">
       <span class="s-nome">${esc(s.nome)}</span>
@@ -977,7 +1124,7 @@ ajustarRodape();
 /* Gancho de teste — só existe em localhost, nunca no GitHub Pages. */
 if (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
   window.__painel = { st, totalUnico, montarCsv, filtrarAgenda, filtrarGrupos,
-                      filtrarEscola, placar, mostrarAba };
+                      filtrarEscola, placar, mostrarAba, dddsEscolhidos };
 </script>
 </body>
 </html>
