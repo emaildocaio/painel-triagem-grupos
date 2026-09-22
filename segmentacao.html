@@ -366,6 +366,7 @@ main{max-width:1180px;margin:0 auto;width:100%;padding:14px 16px 24px;flex:1;}
         <div class="funil" id="liFunil"></div>
         <div class="ferramentas">
           <button class="primario" id="btBaixarLista">Baixar CSV do disparo</button>
+          <button id="btRelatorio">Baixar relatório (HTML)</button>
           <span class="dica" id="liArquivo"></span>
         </div>
         <p class="contagem" style="margin-top:16px">Prévia das 20 primeiras linhas:</p>
@@ -580,7 +581,7 @@ const st = {
   agenda: [], grupos: [], escola: [], membros: new Map(),   // grupo_id -> [chave_fone]
   excC: new Set(), excG: new Set(), excE: new Set(),        // MARCADOS = desconsiderados (fora do envio)
   agFiltrada: [], grFiltrada: [], esFiltrada: [],
-  selecaoAberta: null, salvas: [], lista: null, listaDe: null
+  selecaoAberta: null, salvas: [], lista: null, listaDe: null, resumo: null
 };
 
 /* ---------------- login ---------------- */
@@ -906,6 +907,7 @@ $('#btGerar').addEventListener('click', async () => {
     if (r1.error) throw r1.error;
     if (r2.error) throw r2.error;
     const r = Array.isArray(r1.data) ? r1.data[0] : r1.data;
+    st.resumo = r;
     st.lista = r2.data;
     st.listaDe = st.salvas.find(s => s.id === selecaoId);
     $('#liFunil').innerHTML = [
@@ -930,6 +932,143 @@ $('#btGerar').addEventListener('click', async () => {
     aviso(`Lista pronta: ${nf.format(r.total_final)} telefones.`);
   } catch (err) { aviso('Erro ao gerar: ' + err.message); }
   finally { bt.disabled = false; }
+});
+
+/* Relatório de entrega: uma página só, que já leva o CSV dentro.
+   É montada aqui no navegador — os telefones nunca saem do computador de quem gera. */
+function montarRelatorio() {
+  const r = st.resumo, ddds = dddsEscolhidos();
+  const nomeSel = st.listaDe?.nome ?? '(seleção)';
+  const quando = new Date().toLocaleString('pt-BR');
+  const linhas = ['nome;ddd;numero'];
+  for (const l of st.lista) linhas.push([l.nome || '', l.ddd, l.numero].map(campoCsv).join(';'));
+  const csv = linhas.join('\r\n') + '\r\n';
+
+  const funil = [
+    ['Telefones que a seleção trouxe', r.telefones_distintos, ''],
+    ['Repetições juntadas (mesmo número em vários lugares)', r.repeticoes_juntadas, 'sai'],
+    ['Marcados fora na Agenda ou na Escola', r.fora_regra_exclusao, 'sai'],
+    ['Na lista de bloqueio permanente', r.fora_bloqueio, 'sai'],
+    ['Não são celular brasileiro', r.fora_nao_celular, 'sai'],
+    ['Celular de DDD fora de ' + ddds.join(', '), r.fora_ddd, 'sai'],
+    ['Vão receber', r.total_final, 'fim']
+  ].map(([t, n, c]) => `<tr class="${c}"><td>${c === 'sai' ? '&minus; ' : ''}${esc(t)}</td><td>${nf.format(n)}</td></tr>`).join('');
+
+  const previa = st.lista.slice(0, 30).map(l =>
+    `<tr><td>${l.nome ? esc(l.nome) : '<i>sem nome</i>'}</td><td>${l.ddd}</td><td>${esc(l.numero)}</td><td>${esc(l.fonte)}</td></tr>`).join('');
+
+  return `<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Base de disparo — ${esc(nomeSel)}</title>
+<style>
+:root{--creme:#f8e8c5;--papel:#fffdf7;--papel-2:#fcf3dd;--cafe:#4c241a;--cafe-claro:#6b3626;
+--terracota:#c6430f;--laranja:#ff6b2d;--amarelo:#fac730;--amarelo-claro:#fce185;--rosa:#ffe1d0;
+--linha:#e7d4a8;--areia:#cbb08f;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--creme);color:var(--cafe);
+ font:17px/1.55 "Barlow Semi Condensed",system-ui,sans-serif;}
+.folha{max-width:880px;margin:0 auto;padding:28px 16px 64px;}
+h1{font-size:30px;margin:0 0 4px;line-height:1.15}
+h2{font-size:21px;margin:34px 0 10px;border-bottom:2px solid var(--linha);padding-bottom:5px}
+.sub{color:var(--cafe-claro);margin:0 0 22px}
+.selo{display:inline-block;background:var(--amarelo);border-radius:999px;padding:2px 12px;
+ font-weight:700;font-size:14px;margin-left:8px;vertical-align:3px}
+.destaque{background:var(--papel);border:2px solid var(--terracota);border-radius:14px;
+ padding:16px 18px;margin:18px 0}
+.destaque b{font-size:34px;color:var(--terracota);display:block;line-height:1}
+table{width:100%;border-collapse:collapse;background:var(--papel);
+ border:1px solid var(--linha);border-radius:12px;overflow:hidden;margin:12px 0}
+th{text-align:left;font-size:12.5px;text-transform:uppercase;letter-spacing:.04em;
+ color:var(--cafe-claro);padding:9px 14px;background:var(--papel-2)}
+td{padding:8px 14px;border-top:1px solid var(--papel-2)}
+td:last-child{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+tr.sai td:last-child{color:var(--terracota)}
+tr.fim td{background:var(--amarelo-claro);font-weight:700;font-size:19px}
+table.previa td:last-child{text-align:left;font-weight:400;color:var(--cafe-claro)}
+table.previa td:nth-child(2),table.previa td:nth-child(3),
+table.previa th:nth-child(2),table.previa th:nth-child(3){text-align:right;font-variant-numeric:tabular-nums}
+ul,ol{padding-left:20px} li{margin:5px 0}
+.ok li::marker{content:"✓  ";color:var(--terracota);font-weight:700}
+button{font:inherit;font-weight:700;background:var(--laranja);color:#fff;border:0;
+ border-radius:999px;padding:12px 24px;cursor:pointer}
+.aviso{background:var(--rosa);border-left:5px solid var(--terracota);padding:12px 16px;
+ border-radius:0 10px 10px 0;margin:22px 0}
+.rodape{margin-top:38px;color:var(--cafe-claro);font-size:14.5px;border-top:1px solid var(--linha);padding-top:14px}
+@media print{button{display:none}body{background:#fff}}
+</style></head><body><div class="folha">
+
+<h1>Base de disparo — ${esc(nomeSel)}<span class="selo">40004</span></h1>
+<p class="sub">Gerado em ${esc(quando)} pelo Painel de Segmentação · seleção salva por ${esc(st.listaDe?.criado_por ?? '—')}</p>
+
+<div class="destaque"><b>${nf.format(r.total_final)}</b>telefones vão receber esta campanha</div>
+
+<h2>O que foi feito</h2>
+<p>O comitê abriu o painel e marcou, contato a contato e grupo a grupo, quem <b>não</b> deve
+receber esta mensagem. Três bases entraram na conta: a <b>agenda do celular do Renato</b>
+(7.495 contatos), os <b>571 grupos de WhatsApp</b> de setembro e os <b>511 telefones do
+Colégio Intellectus</b>. A decisão ficou gravada no banco e no CSV de auditoria, que lista
+todos os itens com status <i>incluido</i> ou <i>desconsiderado</i>.</p>
+<p>Depois o painel transformou essa decisão em lista de envio: abriu cada grupo que ficou
+dentro telefone a telefone, juntou tudo e aplicou as regras abaixo, nesta ordem.</p>
+
+<h2>Da seleção até a lista final</h2>
+<table><thead><tr><th>Etapa</th><th>Telefones</th></tr></thead><tbody>${funil}</tbody></table>
+<p>Dos que ficaram: <b>${nf.format(r.vindos_da_agenda)}</b> vieram pela agenda,
+<b>${nf.format(r.vindos_de_grupo)}</b> por grupo e
+<b>${nf.format(r.vindos_da_escola)}</b> pela escola.</p>
+
+<h2>As regras aplicadas</h2>
+<ul class="ok">
+<li>Telefone repetido conta <b>uma vez só</b> — quem está na agenda e em cinco grupos recebe uma mensagem.</li>
+<li>Quem foi marcado fora na Agenda ou na Escola <b>sai</b>, mesmo vindo por um grupo que ficou dentro.
+    A exclusão sempre vence.</li>
+<li>Quem está na <b>lista de bloqueio permanente</b> sai de toda campanha, não só desta.</li>
+<li>Fica só <b>celular brasileiro</b>: fixo e número estrangeiro caem fora.</li>
+<li>Fica só quem tem <b>DDD ${esc(ddds.join(', '))}</b>.</li>
+<li>Quando a pessoa aparece em mais de um lugar, vale o <b>nome da agenda</b>, depois o da escola,
+    e só por último o nome que aparece no grupo.</li>
+</ul>
+
+<h2>Foto da base final</h2>
+<p>As 30 primeiras linhas, para conferência. O arquivo completo tem
+<b>${nf.format(st.lista.length)} linhas</b> e está embutido nesta página.</p>
+<table class="previa"><thead><tr><th>Nome</th><th>DDD</th><th>Número</th><th>Veio de</th></tr></thead>
+<tbody>${previa}</tbody></table>
+<p><button id="bt">Baixar o CSV completo (${nf.format(st.lista.length)} linhas)</button></p>
+
+<div class="aviso"><b>Dado pessoal.</b> Esta página carrega o telefone de
+${nf.format(st.lista.length)} pessoas. Ela é do comitê — não publique, não suba em nuvem
+aberta e não repasse para fora. Quem pedir para não receber mais deve entrar na lista de
+bloqueio permanente, para a decisão valer nas próximas campanhas.</div>
+
+<p class="rodape">Painel de Segmentação · Renato Pellizzari · PSB 40004 · deputado estadual RJ<br>
+Colunas do arquivo: <b>nome; ddd; numero</b> — separador ponto e vírgula, UTF-8 com BOM, abre direto no Excel.</p>
+
+</div>
+<script type="text/plain" id="csv">${csv.replace(/<\//g, '<\\/')}<\/script>
+<script>
+document.getElementById('bt').onclick = function () {
+  // o HTML normaliza CRLF para LF ao ler o texto; devolve o CRLF que o Excel espera
+  var t = '﻿' + document.getElementById('csv').textContent.replace(/\\r?\\n/g, '\\r\\n');
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([t], { type: 'text/csv;charset=utf-8' }));
+  a.download = ${JSON.stringify('disparo-' + arquivoSeguro(nomeSel) + '.csv')};
+  a.click();
+};
+<\/script>
+</body></html>`;
+}
+
+$('#btRelatorio').addEventListener('click', () => {
+  if (!st.lista || !st.resumo) { aviso('Gere a lista primeiro.'); return; }
+  const url = URL.createObjectURL(new Blob([montarRelatorio()], { type: 'text/html;charset=utf-8' }));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `relatorio-${arquivoSeguro(st.listaDe?.nome)}.html`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+  aviso('Relatório baixado. Ele já leva o CSV dentro — abra no navegador.');
 });
 
 $('#btBaixarLista').addEventListener('click', () => {
@@ -1124,7 +1263,7 @@ ajustarRodape();
 /* Gancho de teste — só existe em localhost, nunca no GitHub Pages. */
 if (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
   window.__painel = { st, totalUnico, montarCsv, filtrarAgenda, filtrarGrupos,
-                      filtrarEscola, placar, mostrarAba, dddsEscolhidos };
+                      filtrarEscola, placar, mostrarAba, dddsEscolhidos, montarRelatorio };
 </script>
 </body>
 </html>
